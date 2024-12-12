@@ -1,7 +1,4 @@
-cd /Users/mehdi/Downloads/Project\ Dashboard\ mindeo
-git add .
-git commit -m "Fix case-sensitive imports using barrel exports"
-git push origin mainimport React from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/airtable';
