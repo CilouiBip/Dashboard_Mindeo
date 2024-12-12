@@ -25,7 +25,12 @@ const Dashboard = () => {
     queryFn: api.fetchAuditItems,
   });
 
-  if (isGlobalScoreLoading || isFunctionScoresLoading || isAuditLoading) return <LoadingSpinner />;
+  const { data: marketingProblems, isLoading: isMarketingProblemsLoading } = useQuery({
+    queryKey: ['marketingProblems'],
+    queryFn: api.fetchMarketingProblems,
+  });
+
+  if (isGlobalScoreLoading || isFunctionScoresLoading || isAuditLoading || isMarketingProblemsLoading) return <LoadingSpinner />;
   if (globalScoreError || functionScoresError || auditError)
     return <ErrorMessage error={(globalScoreError || functionScoresError || auditError) as Error} />;
 
