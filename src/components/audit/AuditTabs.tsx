@@ -27,24 +27,24 @@ const AuditTabs: React.FC<AuditTabsProps> = ({ auditItems, onUpdate }) => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="border-b border-gray-700">
-        <nav className="flex space-x-1 px-4" aria-label="Tabs">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`
-                px-4 py-2 text-sm font-medium rounded-t-lg
-                ${activeTab === tab.id
-                  ? 'bg-violet-500 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }
-              `}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+      <div className="space-x-2 mb-6 px-6 pt-6">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`
+              px-4 py-2 
+              rounded-lg
+              transition-colors
+              ${activeTab === tab.id 
+                ? 'bg-violet-500/10 text-violet-400' 
+                : 'text-gray-400 hover:text-gray-300'
+              }
+            `}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <div className="flex-1 overflow-auto">

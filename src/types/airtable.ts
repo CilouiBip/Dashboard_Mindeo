@@ -14,6 +14,7 @@ export interface KPI {
   Nom_KPI: string;
   Type: string;
   Valeur_Actuelle: number;
+  Valeur_Precedente: number;
   Score_KPI_Final: number;
   Statut: string;
   Fonctions: string;

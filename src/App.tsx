@@ -6,12 +6,13 @@ import { queryClient } from './lib/queryClient';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
 import Dashboard from './pages/Dashboard';
-import KPIList from './pages/KPIList';
 import KPIsMVD from './pages/KPIsMVD';
 import AuditTabs from './components/audit/AuditTabs';
 import { api } from './api/airtable';
 import { AuditItem } from './types/airtable';
 import ErrorBoundary from './components/ErrorBoundary';
+import { UIConfigProvider } from './contexts/UIConfigContext';
+import AdminPage from './pages/Admin';
 
 function App() {
   const [auditItems, setAuditItems] = useState<AuditItem[]>([]);
@@ -61,23 +62,25 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <div className="min-h-screen bg-[#14151A]">
-            <Header />
-            <Navigation />
-            <main className="container mx-auto px-4">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/kpis" element={<KPIList />} />
-                <Route path="/kpis-mvd" element={<KPIsMVD />} />
-                <Route path="/audit" element={<AuditTabs auditItems={auditItems} onUpdate={refreshData} />} />
-              </Routes>
-            </main>
-          </div>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </Router>
-      </QueryClientProvider>
+      <UIConfigProvider>
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <div className="min-h-screen bg-[#14151A]">
+              <Header />
+              <Navigation />
+              <main className="container mx-auto px-4">
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/kpis-mvd" element={<KPIsMVD />} />
+                  <Route path="/audit" element={<AuditTabs auditItems={auditItems} onUpdate={refreshData} />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                </Routes>
+              </main>
+            </div>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Router>
+        </QueryClientProvider>
+      </UIConfigProvider>
     </ErrorBoundary>
   );
 }

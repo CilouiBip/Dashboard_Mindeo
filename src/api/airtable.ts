@@ -109,6 +109,7 @@ export const api = {
         const response = await axios.get(`${baseUrl}/Audit_Items`, { 
           headers,
           params: {
+            filterByFormula: "{KPIs_Audit} = 'To Audit '",
             sort: [
               { field: 'Fonction_Name', direction: 'asc' },
               { field: 'Problems_Name', direction: 'asc' },
@@ -137,6 +138,7 @@ export const api = {
             headers,
             params: {
               offset,
+              filterByFormula: "{KPIs_Audit} = 'To Audit '",
               sort: [
                 { field: 'Fonction_Name', direction: 'asc' },
                 { field: 'Problems_Name', direction: 'asc' },
@@ -210,17 +212,23 @@ export const api = {
         return [];
       }
 
+      // Log the first record to see its structure
+      console.log('First KPI record structure:', JSON.stringify(response.data.records[0], null, 2));
+
       return response.data.records.map((record: any) => ({
         ID_KPI: sanitizeString(record.id),
         Nom_KPI: sanitizeString(record.fields.Nom_KPI),
         Type: sanitizeString(record.fields.Type),
         Valeur_Actuelle: sanitizeNumber(record.fields.Valeur_Actuelle),
+        Valeur_Precedente: sanitizeNumber(record.fields.Valeur_Precedente || 0),
         Score_KPI_Final: sanitizeNumber(record.fields.Score_KPI_Final),
         Statut: sanitizeString(record.fields.Statut || 'OK'),
         Fonctions: sanitizeString(record.fields.Fonctions_Readable || 'N/A')
       }));
     } catch (error) {
+      console.error('Error fetching KPIs:', error);
       if (axios.isAxiosError(error)) {
+        console.error('Response:', error.response?.data);
         if (error.response?.status === 404) {
           throw new Error('KPIs table not found. Please check your Airtable configuration.');
         }
@@ -232,11 +240,106 @@ export const api = {
     }
   },
 
-  async updateKPIValue(id: string, value: number): Promise<void> {
+  async fetchKPIData() {
     try {
+      const response = await axios.get(`${baseUrl}/KPIs`, {
+        headers,
+        params: {
+          fields: [
+            'Nom_KPI',
+            'Valeur_Actuelle',
+            'Valeur_Precedente',
+            'Type',
+            'Fonctions'
+          ]
+        }
+      });
+
+      return response.data.records.map(record => ({
+        id: record.id,
+        ...record.fields,
+        previousValue: record.fields.Valeur_Precedente || '-'
+      }));
+    } catch (error) {
+      console.error('Error fetching KPI data:', error);
+      throw error;
+    }
+  },
+
+  async getKPIById(kpiId: string) {
+    try {
+      const response = await axios.get(`${baseUrl}/KPIs/${kpiId}`, {
+        headers
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching KPI:', error);
+      throw error;
+    }
+  },
+
+  async updateKPIValue(kpiId: string, newValue: number) {
+    try {
+      console.log('Updating KPI:', { kpiId, newValue });
+      
+      // 1. Get current KPI data
+      const response = await axios.get(`${baseUrl}/KPIs/${kpiId}`, { headers });
+      console.log('Current KPI data structure:', response.data);
+      
+      if (!response.data || !response.data.fields) {
+        throw new Error('Invalid KPI data received');
+      }
+
+      const currentValue = response.data.fields.Valeur_Actuelle;
+
+      // Create update payload with only the fields we want to update
+      const updatePayload = {
+        fields: {
+          "Valeur_Actuelle": Number(newValue),
+          "Valeur_Precedente": Number(currentValue)
+        }
+      };
+
+      console.log('Update payload:', updatePayload);
+
+      // 2. Update values
+      const updateResponse = await axios.patch(
+        `${baseUrl}/KPIs/${kpiId}`,
+        updatePayload,
+        { headers }
+      );
+
+      console.log('Update response:', updateResponse.data);
+
+      // 3. Refresh KPI data
+      return await this.fetchKPIData();
+    } catch (error) {
+      console.error('Error updating KPI:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Response:', error.response?.data);
+        const message = error.response?.data?.error?.message || 'Failed to update KPI';
+        console.error('Error message:', message);
+        throw new Error(message);
+      }
+      throw error;
+    }
+  },
+
+  async updateKPIValueLegacy(id: string, value: number): Promise<void> {
+    try {
+      // First, get the current value
+      const response = await axios.get(`${baseUrl}/KPIs/${id}`, { headers });
+      const currentValue = response.data.fields.Valeur_Actuelle;
+
+      // Update both current and previous values
       await axios.patch(
         `${baseUrl}/KPIs/${id}`,
-        { fields: { Valeur_Actuelle: value } },
+        { 
+          fields: { 
+            Valeur_Actuelle: value,
+            Valeur_Precedente: currentValue
+          } 
+        },
         { headers }
       );
     } catch (error) {
@@ -253,38 +356,27 @@ export const api = {
   },
 
   async updateAuditItem(id: string, updates: { 
-    status?: string; 
-    score?: number; 
-    criticality?: string;
-    comments?: string;
+    Status?: Status; 
+    Criticality?: Priority;
+    Comments?: string;
   }): Promise<void> {
     try {
-      console.log('Updating audit item:', id, updates);
+      const updatePayload = {
+        fields: {
+          ...(updates.Status && { Status: updates.Status }),
+          ...(updates.Criticality && { Criticality: updates.Criticality }),
+          ...(updates.Comments && { Comments: updates.Comments })
+        }
+      };
+
       await axios.patch(
-        `${baseUrl}/AUDIT_ITEMS/${id}`,
-        {
-          fields: {
-            Status: updates.status,
-            Score: updates.score,
-            Criticality: updates.criticality,
-            Comments: updates.comments,
-          },
-        },
+        `${baseUrl}/Audit/${id}`,
+        updatePayload,
         { headers }
       );
-      console.log('Update successful');
     } catch (error) {
-      console.error('Update failed:', error);
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 404) {
-          throw new Error('Audit item not found');
-        }
-        if (error.response?.status === 401) {
-          throw new Error('Invalid Airtable API key');
-        }
-        console.error('Response:', error.response?.data);
-      }
-      throw new Error('Failed to update audit item');
+      console.error('Error updating audit item:', error);
+      throw error;
     }
   }
 };

@@ -17,26 +17,37 @@ const KPIsMVD = () => {
     queryFn: api.fetchKPIs
   });
 
-  const { data: functionScores, isLoading: scoresLoading, error: scoresError } = useQuery({
+  const { data: functionScores, isLoading: scoresLoading } = useQuery({
     queryKey: ['functionScores'],
     queryFn: api.fetchFunctionScores
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, value }: { id: string; value: number }) =>
-      api.updateKPIValue(id, value),
+  // Convert function scores array to a map for easier lookup
+  const functionScoresMap = functionScores?.reduce((acc, score) => {
+    acc[score.Name] = score.Score_Final_Fonction;
+    return acc;
+  }, {} as Record<string, number>) || {};
+
+  const updateKPIMutation = useMutation({
+    mutationFn: async ({ kpiId, newValue }: { kpiId: string; newValue: number }) => {
+      return api.updateKPIValue(kpiId, newValue);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kpis'] });
     }
   });
 
+  const handleKPIUpdate = async (kpiId: string, newValue: number) => {
+    try {
+      await updateKPIMutation.mutateAsync({ kpiId, newValue });
+    } catch (error) {
+      console.error('Failed to update KPI:', error);
+      // You might want to show an error toast here
+    }
+  };
+
   if (kpisLoading || scoresLoading) return <LoadingSpinner />;
-  if (kpisError || scoresError) return <ErrorMessage error={(kpisError || scoresError) as Error} />;
-  if (!kpis?.length) return (
-    <div className="p-6 text-center">
-      <p className="text-gray-400">No KPIs found</p>
-    </div>
-  );
+  if (kpisError) return <ErrorMessage error={kpisError} />;
 
   // Group KPIs by function
   const groupedKPIs = kpis.reduce((acc, kpi) => {
@@ -107,17 +118,16 @@ const KPIsMVD = () => {
 
       <div className="space-y-4">
         {Object.entries(filteredGroups).map(([fonction, kpis]) => {
-          const functionScore = functionScores?.find(score => score.Name === fonction);
           return (
             <KPIGroupCard
               key={fonction}
               fonction={fonction}
-              functionScore={functionScore?.Score_Final_Fonction}
+              functionScore={functionScoresMap[fonction]}
               kpis={kpis}
               isExpanded={expandedGroups.includes(fonction)}
               onToggle={() => toggleGroup(fonction)}
-              onUpdate={(id, value) => updateMutation.mutate({ id, value })}
-              isUpdating={updateMutation.isLoading}
+              onUpdate={handleKPIUpdate}
+              isUpdating={updateKPIMutation.isLoading}
             />
           );
         })}

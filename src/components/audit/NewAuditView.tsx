@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
-import { AuditItem } from '../../types/airtable';
+import { AuditItem, Status, Priority } from '../../types/airtable';
 import { api } from '../../api/airtable';
 import { StarRating } from '../ui/star-rating';
 
@@ -21,15 +21,7 @@ interface HierarchyItem {
             [categoryName: string]: {
               items: {
                 [itemName: string]: {
-                  actions: Array<{
-                    id: string;
-                    action: string;
-                    status: string;
-                    criticality: string;
-                    score: number;
-                    playbookLink?: string;
-                    comments?: string;
-                  }>;
+                  actions: AuditItem[];
                   totalActions: number;
                   completedActions: number;
                 };
@@ -45,44 +37,36 @@ interface HierarchyItem {
 }
 
 interface ActionProps {
-  action: {
-    id: string;
-    action: string;
-    status: string;
-    criticality: string;
-    score: number;
-    playbookLink?: string;
-    comments?: string;
-  };
+  action: AuditItem;
   onUpdate: () => void;
 }
 
 const Action: React.FC<ActionProps> = ({ action, onUpdate }) => {
-  const [localScore, setLocalScore] = useState(action.score || 1);
-  const [localStatus, setLocalStatus] = useState(action.status);
-  const [localCriticality, setLocalCriticality] = useState(action.criticality);
-  const [localComments, setLocalComments] = useState(action.comments || '');
+  const [localScore, setLocalScore] = useState(action.Score || 1);
+  const [localStatus, setLocalStatus] = useState<Status>(action.Status);
+  const [localCriticality, setLocalCriticality] = useState<Priority>(action.Criticality);
+  const [localComments, setLocalComments] = useState(action.Comments || '');
   const [isUpdating, setIsUpdating] = useState(false);
-  const statusOptions = ['Not Started', 'In Progress', 'Completed'];
-  const criticalityOptions = ['Low', 'Medium', 'High'];
+  const statusOptions: Status[] = ['Not Started', 'In Progress', 'Completed'];
+  const criticalityOptions: Priority[] = ['Low', 'Medium', 'High'];
 
   useEffect(() => {
-    setLocalScore(action.score || 1);
-    setLocalStatus(action.status);
-    setLocalCriticality(action.criticality);
-    setLocalComments(action.comments || '');
+    setLocalScore(action.Score || 1);
+    setLocalStatus(action.Status);
+    setLocalCriticality(action.Criticality);
+    setLocalComments(action.Comments || '');
   }, [action]);
 
-  const handleUpdate = async (updates: { status?: string; score?: number; criticality?: string; comments?: string }) => {
+  const handleUpdate = async (updates: { Status?: Status; Score?: number; Criticality?: Priority; Comments?: string }) => {
     try {
       setIsUpdating(true);
       
-      await api.updateAuditItem(action.id, updates);
+      await api.updateAuditItem(action.Item_ID, updates);
       
-      if (updates.score !== undefined) setLocalScore(updates.score);
-      if (updates.status !== undefined) setLocalStatus(updates.status);
-      if (updates.criticality !== undefined) setLocalCriticality(updates.criticality);
-      if (updates.comments !== undefined) setLocalComments(updates.comments);
+      if (updates.Score !== undefined) setLocalScore(updates.Score);
+      if (updates.Status !== undefined) setLocalStatus(updates.Status);
+      if (updates.Criticality !== undefined) setLocalCriticality(updates.Criticality);
+      if (updates.Comments !== undefined) setLocalComments(updates.Comments);
       
       await onUpdate();
     } catch (error) {
@@ -92,28 +76,25 @@ const Action: React.FC<ActionProps> = ({ action, onUpdate }) => {
     }
   };
 
-  const debouncedUpdateComments = useMemo(
-    () => {
-      let timeoutId: NodeJS.Timeout;
-      return (comments: string) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          handleUpdate({ comments });
-        }, 500); // Wait 500ms after user stops typing
-      };
-    },
-    []
-  );
+  const debouncedUpdateComments = useMemo(() => {
+    let timeoutId: NodeJS.Timeout;
+    return (comments: string) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        handleUpdate({ Comments: comments });
+      }, 500); // Wait 500ms after user stops typing
+    };
+  }, []);
 
   return (
     <div className="bg-[#141517] border border-[#2D2E3A] rounded-lg p-4 hover:border-violet-500/50 transition-all">
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-grow">
-            <p className="text-sm text-gray-300">{action.action}</p>
-            {action.playbookLink && (
+            <p className="text-sm text-gray-300">{action.Action_Required}</p>
+            {action.Playbook_Link && (
               <a
-                href={action.playbookLink}
+                href={action.Playbook_Link}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-violet-400 hover:text-violet-300 inline-flex items-center gap-1 text-sm mt-1"
@@ -126,12 +107,12 @@ const Action: React.FC<ActionProps> = ({ action, onUpdate }) => {
           <div className="flex items-center gap-4">
             <StarRating
               value={localScore}
-              onChange={(value) => handleUpdate({ score: value })}
+              onChange={(value) => handleUpdate({ Score: value })}
               disabled={isUpdating}
             />
             <select
               value={localStatus}
-              onChange={(e) => handleUpdate({ status: e.target.value })}
+              onChange={(e) => handleUpdate({ Status: e.target.value as Status })}
               className="px-2 py-1 bg-[#1A1B21] border border-[#2D2E3A] rounded text-sm text-gray-200 focus:border-violet-500 focus:outline-none"
               disabled={isUpdating}
             >
@@ -143,7 +124,7 @@ const Action: React.FC<ActionProps> = ({ action, onUpdate }) => {
             </select>
             <select
               value={localCriticality}
-              onChange={(e) => handleUpdate({ criticality: e.target.value })}
+              onChange={(e) => handleUpdate({ Criticality: e.target.value as Priority })}
               className="px-2 py-1 bg-[#1A1B21] border border-[#2D2E3A] rounded text-sm text-gray-200 focus:border-violet-500 focus:outline-none"
               disabled={isUpdating}
             >
@@ -257,15 +238,7 @@ const NewAuditView: React.FC<NewAuditViewProps> = ({ auditItems }) => {
       }
 
       const itemGroup = acc[functionName].problems[problemName].subProblems[subProblemText].categoryProblems[categoryName].items[itemName];
-      itemGroup.actions.push({
-        id: item.Item_ID,
-        action: item.Action_Required,
-        status: item.Status,
-        criticality: item.Criticality,
-        score: item.Score,
-        playbookLink: item.Playbook_Link,
-        comments: item.Comments,
-      });
+      itemGroup.actions.push(item);
       itemGroup.totalActions++;
       if (item.Status === 'Completed') {
         itemGroup.completedActions++;
@@ -365,7 +338,7 @@ const NewAuditView: React.FC<NewAuditViewProps> = ({ auditItems }) => {
                                               </div>
                                               <div className="mt-4 space-y-2">
                                                 {itemData.actions.map((action) => (
-                                                  <Action key={action.id} action={action} onUpdate={handleActionUpdate} />
+                                                  <Action key={action.Item_ID} action={action} onUpdate={handleActionUpdate} />
                                                 ))}
                                               </div>
                                             </div>

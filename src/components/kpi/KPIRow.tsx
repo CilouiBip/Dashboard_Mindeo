@@ -6,32 +6,54 @@ import { formatNumber } from '../../utils/format';
 
 interface KPIRowProps {
   kpi: KPI;
+  showPreviousValue?: boolean;
+  onUpdate?: (kpiId: string, newValue: number) => void;
 }
 
-const KPIRow: React.FC<KPIRowProps> = ({ kpi }) => {
+const KPIRow: React.FC<KPIRowProps> = ({ kpi, showPreviousValue = false, onUpdate }) => {
   return (
-    <div className="bg-[#1A1B21] rounded-lg p-3 hover:bg-[#1E1F26] transition-colors">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center space-x-2">
-          {kpi.Statut === 'OK' ? (
-            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-          ) : (
-            <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-          )}
-          <div>
-            <span className="text-white">{kpi.Nom_KPI}</span>
-            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400">
-              {kpi.Type}
-            </span>
-          </div>
-        </div>
+    <div className="flex items-center px-4 py-3 hover:bg-[#1E1F26] transition-colors text-sm">
+      <div className="flex-1">
+        <span className="text-white">{kpi.Nom_KPI}</span>
+      </div>
+      
+      <div className="flex-none w-32 text-right">
         <span className={`font-medium ${getScoreColor(kpi.Score_KPI_Final)}`}>
           {formatNumber(kpi.Score_KPI_Final)}
         </span>
       </div>
-      <div className="mt-2 flex justify-between text-sm text-gray-400">
-        <span>Valeur actuelle</span>
-        <span>{formatNumber(kpi.Valeur_Actuelle)}</span>
+
+      <div className="flex-none w-40 text-right text-gray-400">
+        {formatNumber(kpi.Valeur_Actuelle)}
+      </div>
+
+      <div className="flex-none w-40">
+        <input
+          type="text"
+          className="w-full px-3 py-1 bg-[#2D2E3A] border border-[#3E3F4A] rounded text-white text-right"
+          placeholder="Nouvelle valeur"
+          defaultValue={kpi.Valeur_Actuelle}
+        />
+      </div>
+
+      <div className="flex-none w-24 text-right">
+        {onUpdate && (
+          <button
+            onClick={() => {
+              const input = (document.activeElement as HTMLInputElement);
+              const newValue = input?.value;
+              if (newValue) {
+                const numValue = parseFloat(newValue);
+                if (!isNaN(numValue)) {
+                  onUpdate(kpi.ID_KPI, numValue);
+                }
+              }
+            }}
+            className="px-4 py-1 bg-[#2D2E3A] hover:bg-[#3E3F4A] text-blue-400 rounded transition-colors"
+          >
+            Update
+          </button>
+        )}
       </div>
     </div>
   );

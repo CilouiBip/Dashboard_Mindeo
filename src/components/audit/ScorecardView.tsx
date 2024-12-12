@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { AuditItem } from '../../types/airtable';
+import { Card } from '../ui/card';
+import { CompletionCircle } from '../ui/completion-circle';
+import { CompletionBar } from '../ui/completion-bar';
+import { ScoreDisplay } from '../ui/score-display';
+import { FunctionIcon } from './FunctionIcon';
+import { PerformanceItem } from './PerformanceItem';
 
 interface ScorecardViewProps {
   auditItems: AuditItem[];
@@ -44,13 +51,11 @@ const ScorecardView: React.FC<ScorecardViewProps> = ({ auditItems }) => {
         totalActions: 0
       };
 
-      // Only include in score calculation if it has been rated
       if (item.Score !== undefined && item.Score !== null) {
         currentFunction.score += item.Score;
         currentFunction.totalItems++;
       }
 
-      // Track completion status
       if (item.Status === 'Completed') {
         currentFunction.completedItems++;
         currentFunction.actionsCompleted++;
@@ -67,13 +72,12 @@ const ScorecardView: React.FC<ScorecardViewProps> = ({ auditItems }) => {
         ...func,
         score: func.totalItems > 0 ? (func.score / func.totalItems) : 0
       }))
-      .sort((a, b) => b.score - a.score); // Sort by score descending
+      .sort((a, b) => b.score - a.score);
 
     setFunctionScores(calculatedFunctionScores);
     setTotalActionsCompleted(globalActionsCompleted);
     setTotalActions(globalTotalActions);
 
-    // Calculate overall score only from rated items
     calculatedFunctionScores.forEach(func => {
       if (func.totalItems > 0) {
         totalRatedScore += func.score;
@@ -84,113 +88,84 @@ const ScorecardView: React.FC<ScorecardViewProps> = ({ auditItems }) => {
     setOverallScore(totalRatedItems > 0 ? (totalRatedScore / totalRatedItems) : 0);
   };
 
-  const getScoreColor = (score: number): string => {
-    if (score >= 7) return 'text-green-500';
-    if (score >= 5) return 'text-yellow-500';
-    return 'text-red-500';
-  };
-
-  const renderCompletionCircle = (completed: number, total: number) => {
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    return (
-      <div className="relative inline-flex items-center justify-center">
-        <svg className="w-32 h-32">
-          <circle
-            className="text-gray-700"
-            strokeWidth="8"
-            stroke="currentColor"
-            fill="transparent"
-            r="56"
-            cx="64"
-            cy="64"
-          />
-          <circle
-            className="text-violet-500"
-            strokeWidth="8"
-            strokeDasharray={`${percentage * 3.51} 351`}
-            strokeLinecap="round"
-            stroke="currentColor"
-            fill="transparent"
-            r="56"
-            cx="64"
-            cy="64"
-          />
-        </svg>
-        <span className="absolute text-2xl font-bold text-white">{percentage}%</span>
-      </div>
-    );
-  };
+  const topPerformers = functionScores.slice(0, 3);
+  const needAttention = functionScores.slice(-3).reverse();
+  const completionPercentage = totalActions > 0 ? (totalActionsCompleted / totalActions) * 100 : 0;
 
   return (
     <div className="p-6 space-y-6">
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Score Global Card */}
-        <div className="bg-gray-800 rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-400 mb-4">Score Global</h2>
-          <div className="text-6xl font-bold mb-6">
-            <span className={getScoreColor(overallScore)}>{overallScore.toFixed(1)}</span>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-lg font-medium text-gray-400 mb-2">Top Performers</h3>
-              {functionScores.slice(0, 3).map(func => (
-                <div key={func.name} className="flex justify-between items-center mb-2">
-                  <span className="text-white">{func.name}</span>
-                  <span className={getScoreColor(func.score)}>{func.score.toFixed(1)}</span>
-                </div>
+        <Card className="bg-[#1C1D24] border border-[#2D2E3A] rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-200 mb-4">Score Global</h2>
+          <ScoreDisplay value={overallScore} size="lg" />
+          
+          <div className="grid grid-cols-2 gap-x-8 mt-6">
+            <div className="space-y-4">
+              <h3 className="text-sm text-gray-400">Top Performers</h3>
+              {topPerformers.map(item => (
+                <PerformanceItem key={item.name} name={item.name} score={item.score} />
               ))}
             </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-400 mb-2">Need Attention</h3>
-              {functionScores.slice(-3).reverse().map(func => (
-                <div key={func.name} className="flex justify-between items-center mb-2">
-                  <span className="text-white">{func.name}</span>
-                  <span className={getScoreColor(func.score)}>{func.score.toFixed(1)}</span>
-                </div>
+            <div className="space-y-4">
+              <h3 className="text-sm text-gray-400">Need Attention</h3>
+              {needAttention.map(item => (
+                <PerformanceItem key={item.name} name={item.name} score={item.score} />
               ))}
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Global Completion Card */}
-        <div className="bg-gray-800 rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-400 mb-4">Global Completion</h2>
-          <div className="flex justify-center mb-4">
-            {renderCompletionCircle(totalActionsCompleted, totalActions)}
+        <Card className="bg-[#1C1D24] border border-[#2D2E3A] rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-200 mb-6">Global Completion</h2>
+          <div className="flex flex-col items-center justify-center min-h-[300px]">
+            <CompletionCircle 
+              percentage={completionPercentage} 
+              size={200}
+              strokeWidth={12}
+              className="mb-6"
+            />
+            <p className="text-sm text-gray-400">
+              {totalActionsCompleted} of {totalActions} actions completed
+            </p>
           </div>
-          <div className="text-center text-gray-400">
-            {totalActionsCompleted} of {totalActions} actions completed
-          </div>
-        </div>
+        </Card>
       </div>
 
-      {/* Performance by Function */}
-      <h2 className="text-2xl font-bold text-white mt-8 mb-4">Performance by Function</h2>
-      <div className="grid grid-cols-3 gap-6">
-        {functionScores.map(func => (
-          <div key={func.name} className="bg-gray-800 rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-white">{func.name}</h3>
-              <span className="text-gray-400">→</span>
-            </div>
-            <div className="mb-4">
-              <div className="text-sm text-gray-400">Score</div>
-              <div className={`text-3xl font-bold ${getScoreColor(func.score)}`}>
-                {func.score.toFixed(1)}
+      {/* Function Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {functionScores.map(func => {
+          const completionPercentage = func.totalActions > 0 
+            ? (func.actionsCompleted / func.totalActions) * 100 
+            : 0;
+
+          return (
+            <Card
+              key={func.name}
+              className="bg-[#1C1D24] border border-[#2D2E3A] rounded-lg p-6 hover:border-violet-500/50 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <FunctionIcon name={func.name} />
+                  <h3 className="font-medium text-gray-200">{func.name}</h3>
+                </div>
+                <ArrowRight className="h-5 w-5 text-gray-400" />
               </div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-sm text-gray-400">Completion Rate</div>
-              <div className="text-lg text-violet-500">
-                {func.totalActions > 0 ? Math.round((func.actionsCompleted / func.totalActions) * 100) : 0}%
+              
+              <div className="space-y-4">
+                <ScoreDisplay value={func.score} size="md" />
+                <CompletionBar 
+                  percentage={completionPercentage} 
+                  className="h-1.5"
+                />
+                <p className="text-sm text-gray-400">
+                  {func.actionsCompleted} / {func.totalActions} actions
+                </p>
               </div>
-              <div className="text-sm text-gray-400">Actions Completed</div>
-              <div className="text-white">
-                {func.actionsCompleted} / {func.totalActions}
-              </div>
-            </div>
-          </div>
-        ))}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
