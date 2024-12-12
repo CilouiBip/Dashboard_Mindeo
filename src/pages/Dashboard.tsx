@@ -1,11 +1,14 @@
-import React from 'react';
+cd /Users/mehdi/Downloads/Project\ Dashboard\ mindeo
+git add .
+git commit -m "Fix case-sensitive imports using barrel exports"
+git push origin mainimport React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/airtable';
 import { BarChart2, ArrowRight, Activity, TrendingUp, TrendingDown } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
-import { CompletionPieChart } from '../components/Dashboard';
+import CompletionPieChart from '../components/Dashboard/CompletionPieChart';
 import { getScoreColor } from '../utils/calculations';
 import { formatNumber } from '../utils/format';
 
