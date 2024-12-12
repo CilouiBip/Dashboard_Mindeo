@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchMarketingProblems } from '../api/airtable';
+import { api } from '../api/airtable';
 import { Problem } from '../types/airtable';
 
 const Dashboard = () => {
@@ -10,7 +10,7 @@ const Dashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await fetchMarketingProblems();
+        const data = await api.fetchMarketingProblems();
         setProblems(data);
       } catch (err) {
         setError('Failed to fetch marketing problems.');

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { KPI, GlobalScore, FunctionScore, AuditItem } from '../types/airtable';
+import { KPI, GlobalScore, FunctionScore, AuditItem, Problem } from '../types/airtable';
 
 const baseUrl = `https://api.airtable.com/v0/${import.meta.env.VITE_AIRTABLE_BASE_ID}`;
 const headers = {
@@ -47,6 +47,19 @@ export const api = {
         }
       }
       throw new Error('Failed to fetch global score');
+    }
+  },
+
+  async fetchMarketingProblems(): Promise<Problem[]> {
+    try {
+      const response = await axios.get(`${baseUrl}/Marketing`, { headers });
+      return response.data.records.map((record: any) => ({
+        id: record.id,
+        ...record.fields,
+      }));
+    } catch (error) {
+      console.error('Error fetching marketing problems:', error);
+      throw error;
     }
   },
 
