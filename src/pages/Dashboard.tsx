@@ -5,7 +5,7 @@ import { api } from '../api/airtable';
 import { BarChart2, ArrowRight, Activity, TrendingUp, TrendingDown } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
-import CompletionPieChart from '../components/dashboard/CompletionPieChart';
+import { CompletionPieChart } from '../components/Dashboard';
 import { getScoreColor } from '../utils/calculations';
 import { formatNumber } from '../utils/format';
 
