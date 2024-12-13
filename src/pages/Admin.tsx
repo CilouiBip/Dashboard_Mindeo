@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import Card from '../components/common/Card';
 import { Lock } from 'lucide-react';
+import { useUIConfig } from '../contexts/UIConfigContext';
 
 const ADMIN_PASSWORD = '0000';
 const LOCAL_STORAGE_AUTH_KEY = 'admin_authenticated';
@@ -15,6 +16,9 @@ interface UIConfig {
   functionLabels: {
     [key: string]: string;
   };
+  appTitle: string;
+  appLogo: string;
+  headerLogo: string;
 }
 
 const defaultUIConfig: UIConfig = {
@@ -31,14 +35,21 @@ const defaultUIConfig: UIConfig = {
     Product: 'Product',
     HR: 'HR',
     Sales: 'Sales'
-  }
+  },
+  appTitle: '',
+  appLogo: '',
+  headerLogo: ''
 };
 
 const AdminPage: React.FC = () => {
+  const { uiConfig, updateConfig } = useUIConfig();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
-  const [uiConfig, setUIConfig] = useState<UIConfig>(defaultUIConfig);
   const [error, setError] = useState<string>('');
+  const [selectedLogo, setSelectedLogo] = useState<File | null>(null);
+  const [selectedHeaderLogo, setSelectedHeaderLogo] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const headerLogoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Check if already authenticated
@@ -48,7 +59,7 @@ const AdminPage: React.FC = () => {
     // Load saved UI config
     const savedConfig = localStorage.getItem(LOCAL_STORAGE_UI_CONFIG_KEY);
     if (savedConfig) {
-      setUIConfig(JSON.parse(savedConfig));
+      updateConfig(JSON.parse(savedConfig));
     }
   }, []);
 
@@ -74,13 +85,41 @@ const AdminPage: React.FC = () => {
   };
 
   const updateFunctionLabel = (key: string, value: string) => {
-    setUIConfig(prev => ({
+    updateConfig(prev => ({
       ...prev,
       functionLabels: {
         ...prev.functionLabels,
         [key]: value
       }
     }));
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateConfig({ appTitle: e.target.value });
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateConfig({ appLogo: reader.result as string });
+        setSelectedLogo(file);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleHeaderLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateConfig({ headerLogo: reader.result as string });
+        setSelectedHeaderLogo(file);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   if (!isAuthenticated) {
@@ -128,6 +167,107 @@ const AdminPage: React.FC = () => {
         </div>
 
         <Card className="p-6 space-y-6">
+          <h2 className="text-lg font-medium text-white">App Settings</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                App Title (Optional)
+              </label>
+              <input
+                type="text"
+                value={uiConfig.appTitle}
+                onChange={handleTitleChange}
+                placeholder="Default: Infopreneur Business Health"
+                className="w-full px-4 py-2 bg-[#1C1D24] border border-[#2D2E3A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Custom App Logo (Optional)
+              </label>
+              <div className="flex items-center space-x-4">
+                {uiConfig.appLogo && (
+                  <div className="flex items-center space-x-2">
+                    <img
+                      src={uiConfig.appLogo}
+                      alt="Custom App Logo"
+                      className="h-8 w-auto object-contain"
+                    />
+                    <button
+                      onClick={() => updateConfig({ appLogo: '' })}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      Reset to default
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 bg-violet-500/10 text-violet-400 rounded-lg hover:bg-violet-500/20 transition-colors"
+                >
+                  {uiConfig.appLogo ? 'Change Logo' : 'Upload Custom Logo'}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                  className="hidden"
+                />
+              </div>
+              {!uiConfig.appLogo && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Currently using default BarChart2 icon
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Custom Header Logo (Optional)
+              </label>
+              <div className="flex items-center space-x-4">
+                {uiConfig.headerLogo && (
+                  <div className="flex items-center space-x-2">
+                    <img
+                      src={uiConfig.headerLogo}
+                      alt="Custom Header Logo"
+                      className="h-6 w-auto object-contain"
+                    />
+                    <button
+                      onClick={() => updateConfig({ headerLogo: '' })}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      Reset to default
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => headerLogoInputRef.current?.click()}
+                  className="px-4 py-2 bg-violet-500/10 text-violet-400 rounded-lg hover:bg-violet-500/20 transition-colors"
+                >
+                  {uiConfig.headerLogo ? 'Change Logo' : 'Upload Custom Logo'}
+                </button>
+                <input
+                  ref={headerLogoInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleHeaderLogoChange}
+                  className="hidden"
+                />
+              </div>
+              {!uiConfig.headerLogo && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Currently using default BarChart2 icon
+                </p>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 space-y-6">
           <h2 className="text-lg font-medium text-white">KPI Page Settings</h2>
           
           <div className="space-y-4">
@@ -138,7 +278,7 @@ const AdminPage: React.FC = () => {
               <input
                 type="text"
                 value={uiConfig.kpiPageTitle}
-                onChange={(e) => setUIConfig(prev => ({ ...prev, kpiPageTitle: e.target.value }))}
+                onChange={(e) => updateConfig(prev => ({ ...prev, kpiPageTitle: e.target.value }))}
                 className="w-full px-4 py-2 bg-[#1C1D24] border border-[#2D2E3A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
               />
             </div>
@@ -150,7 +290,7 @@ const AdminPage: React.FC = () => {
               <input
                 type="text"
                 value={uiConfig.kpiUpdateTitle}
-                onChange={(e) => setUIConfig(prev => ({ ...prev, kpiUpdateTitle: e.target.value }))}
+                onChange={(e) => updateConfig(prev => ({ ...prev, kpiUpdateTitle: e.target.value }))}
                 className="w-full px-4 py-2 bg-[#1C1D24] border border-[#2D2E3A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
               />
             </div>
@@ -162,7 +302,7 @@ const AdminPage: React.FC = () => {
               <input
                 type="text"
                 value={uiConfig.kpiSearchPlaceholder}
-                onChange={(e) => setUIConfig(prev => ({ ...prev, kpiSearchPlaceholder: e.target.value }))}
+                onChange={(e) => updateConfig(prev => ({ ...prev, kpiSearchPlaceholder: e.target.value }))}
                 className="w-full px-4 py-2 bg-[#1C1D24] border border-[#2D2E3A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
               />
             </div>
@@ -174,7 +314,7 @@ const AdminPage: React.FC = () => {
               <input
                 type="text"
                 value={uiConfig.expandAllText}
-                onChange={(e) => setUIConfig(prev => ({ ...prev, expandAllText: e.target.value }))}
+                onChange={(e) => updateConfig(prev => ({ ...prev, expandAllText: e.target.value }))}
                 className="w-full px-4 py-2 bg-[#1C1D24] border border-[#2D2E3A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
               />
             </div>

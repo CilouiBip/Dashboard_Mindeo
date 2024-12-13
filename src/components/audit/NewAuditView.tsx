@@ -60,8 +60,10 @@ const Action: React.FC<ActionProps> = ({ action, onUpdate }) => {
   const handleUpdate = async (updates: { Status?: Status; Score?: number; Criticality?: Priority; Comments?: string }) => {
     try {
       setIsUpdating(true);
+      console.log('Updating audit item:', action.Item_ID, 'with updates:', updates);
       
       await api.updateAuditItem(action.Item_ID, updates);
+      console.log('Successfully updated audit item');
       
       if (updates.Score !== undefined) setLocalScore(updates.Score);
       if (updates.Status !== undefined) setLocalStatus(updates.Status);
@@ -71,6 +73,11 @@ const Action: React.FC<ActionProps> = ({ action, onUpdate }) => {
       await onUpdate();
     } catch (error) {
       console.error('Failed to update audit item:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+      }
+      throw error;
     } finally {
       setIsUpdating(false);
     }

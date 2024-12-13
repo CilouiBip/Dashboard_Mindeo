@@ -67,11 +67,15 @@ const KPICard: React.FC<KPICardProps> = ({ kpi, onUpdate, isUpdating }) => {
   };
 
   return (
-    <div className={`rounded-lg p-6 ${kpi.Type === 'Principal' ? 'bg-[#1C1D24]' : 'bg-[#18191F]'} border border-[#2D2E3A] hover:border-violet-500/50 transition-all`}>
+    <div className={`rounded-lg p-6 bg-[#1C1D24] border border-[#2D2E3A] hover:border-${kpi.Type === 'Principal' ? 'violet' : 'gray'}-500/50 transition-all`}>
       <div className="flex items-start justify-between mb-4">
         <div className="space-y-1">
           <h3 className="text-sm font-normal text-white">{kpi.Nom_KPI}</h3>
-          <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400">
+          <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${
+            kpi.Type === 'Principal' 
+              ? 'bg-violet-500/10 text-violet-400'
+              : 'bg-gray-500/10 text-gray-400'
+          }`}>
             {kpi.Type}
           </span>
         </div>
@@ -87,7 +91,11 @@ const KPICard: React.FC<KPICardProps> = ({ kpi, onUpdate, isUpdating }) => {
         <div className="space-y-2">
           <div className="h-1.5 bg-[#2D2E3A] rounded-full overflow-hidden">
             <div
-              className={`h-full bg-gradient-to-r ${getProgressColor()} rounded-full transition-all duration-500`}
+              className={`h-full ${
+                kpi.Type === 'Principal'
+                  ? 'bg-gradient-to-r from-violet-500/20 to-violet-500'
+                  : 'bg-gradient-to-r from-gray-500/20 to-gray-400'
+              } rounded-full transition-all duration-500`}
               style={{ width: getProgressWidth() }}
             />
           </div>
@@ -95,54 +103,60 @@ const KPICard: React.FC<KPICardProps> = ({ kpi, onUpdate, isUpdating }) => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <span className="text-xs text-gray-400">Valeur Précédente</span>
-            <p className="text-sm text-gray-300">
+            <span className={`text-xs ${kpi.Type === 'Principal' ? 'text-gray-400' : 'text-gray-500'}`}>
+              Valeur Précédente
+            </span>
+            <p className={`text-sm ${kpi.Type === 'Principal' ? 'text-gray-300' : 'text-gray-400'}`}>
               {kpi.Valeur_Precedente ? formatNumber(kpi.Valeur_Precedente) : '-'}
             </p>
           </div>
           <div>
-            <span className="text-xs text-gray-400">Valeur Actuelle</span>
-            <p className="text-sm text-white">{formatNumber(kpi.Valeur_Actuelle)}</p>
+            <span className={`text-xs ${kpi.Type === 'Principal' ? 'text-gray-400' : 'text-gray-500'}`}>
+              Valeur Actuelle
+            </span>
+            {isEditing ? (
+              <input
+                type="number"
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+                className={`w-full px-3 py-2 rounded-lg transition-all ${
+                  kpi.Type === 'Principal'
+                    ? 'bg-[#2D2E3A] border-[#3E3F4A] text-white focus:ring-violet-500'
+                    : 'bg-[#1E1F26] border-[#2D2E3A] text-gray-400 focus:ring-gray-500'
+                } border focus:outline-none focus:ring-2`}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleUpdate();
+                  }
+                }}
+                autoFocus
+              />
+            ) : (
+              <p className={`text-sm ${kpi.Type === 'Principal' ? 'text-gray-300' : 'text-gray-400'}`}>
+                {formatNumber(kpi.Valeur_Actuelle)}
+              </p>
+            )}
           </div>
         </div>
 
-        {isEditing ? (
-          <div className="space-y-3">
-            <input
-              type="number"
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-[#2D2E3A] border border-[#3E3F4A] rounded focus:outline-none focus:border-violet-500 text-white"
-              placeholder="Nouvelle valeur"
-            />
-            <div className="flex space-x-2">
-              <button
-                onClick={handleUpdate}
-                disabled={isUpdating}
-                className="flex-1 px-3 py-1.5 text-sm bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 rounded transition-colors disabled:opacity-50"
-              >
-                Valider
-              </button>
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setNewValue('');
-                }}
-                disabled={isUpdating}
-                className="flex-1 px-3 py-1.5 text-sm bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-colors disabled:opacity-50"
-              >
-                Annuler
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="w-full px-3 py-1.5 text-sm bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 rounded transition-colors"
-          >
-            Modifier
-          </button>
-        )}
+        <button
+          onClick={() => {
+            if (isEditing) {
+              handleUpdate();
+            } else {
+              setIsEditing(true);
+              setNewValue(kpi.Valeur_Actuelle.toString());
+            }
+          }}
+          disabled={isUpdating}
+          className={`w-full px-4 py-2 rounded-lg transition-all ${
+            kpi.Type === 'Principal'
+              ? 'bg-violet-500/10 text-violet-400 hover:bg-violet-500/20'
+              : 'bg-gray-500/10 text-gray-400 hover:bg-gray-500/20'
+          }`}
+        >
+          {isUpdating ? 'Updating...' : isEditing ? 'Update' : 'Modifier'}
+        </button>
       </div>
     </div>
   );

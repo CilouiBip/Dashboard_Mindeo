@@ -359,23 +359,40 @@ export const api = {
     Status?: Status; 
     Criticality?: Priority;
     Comments?: string;
+    Score?: number;
   }): Promise<void> {
     try {
       const updatePayload = {
         fields: {
           ...(updates.Status && { Status: updates.Status }),
           ...(updates.Criticality && { Criticality: updates.Criticality }),
-          ...(updates.Comments && { Comments: updates.Comments })
+          ...(updates.Comments && { Comments: updates.Comments }),
+          ...(updates.Score !== undefined && { Score: updates.Score })
         }
       };
 
-      await axios.patch(
-        `${baseUrl}/Audit/${id}`,
+      console.log('Sending update to Airtable:', {
+        url: `${baseUrl}/Audit_Items/${id}`,
+        payload: updatePayload,
+        headers
+      });
+
+      const response = await axios.patch(
+        `${baseUrl}/Audit_Items/${id}`,
         updatePayload,
         { headers }
       );
+
+      console.log('Airtable response:', response.data);
     } catch (error) {
       console.error('Error updating audit item:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+      }
       throw error;
     }
   }
