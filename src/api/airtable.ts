@@ -195,6 +195,58 @@ export const api = {
     }
   },
 
+  async fetchFullList() {
+    try {
+      const response = await axios.get(`${baseUrl}/Audit_Items`, { 
+        headers,
+        params: {
+          sort: [
+            { field: 'Fonction_Name', direction: 'asc' },
+            { field: 'Problems_Name', direction: 'asc' },
+            { field: 'Categorie_Problems_Name', direction: 'asc' }
+          ],
+          pageSize: 100
+        }
+      });
+
+      let allRecords = [...response.data.records];
+      let offset = response.data.offset;
+      
+      while (offset) {
+        const nextPage = await axios.get(`${baseUrl}/Audit_Items`, {
+          headers,
+          params: {
+            offset,
+            sort: [
+              { field: 'Fonction_Name', direction: 'asc' },
+              { field: 'Problems_Name', direction: 'asc' },
+              { field: 'Categorie_Problems_Name', direction: 'asc' }
+            ],
+            pageSize: 100
+          }
+        });
+        
+        allRecords = [...allRecords, ...nextPage.data.records];
+        offset = nextPage.data.offset;
+      }
+
+      return allRecords.map(record => ({
+        id: record.id,
+        Fonction_Name: sanitizeString(record.fields.Fonction_Name),
+        Problems_Name: sanitizeString(record.fields.Problems_Name),
+        Sub_Problems_Text: sanitizeString(record.fields.Sub_Problems_Text),
+        Categorie_Problems_Name: sanitizeString(record.fields.Categorie_Problems_Name),
+        Item_Name: sanitizeString(record.fields.Item_Name),
+        Action_Required: sanitizeString(record.fields.Action_Required),
+        Status: sanitizeString(record.fields.Status || 'Not Started'),
+        Criticality: sanitizeString(record.fields.Criticality || 'Low')
+      }));
+    } catch (error) {
+      console.error('Error fetching full list:', error);
+      throw error;
+    }
+  },
+
   async fetchKPIs(): Promise<KPI[]> {
     try {
       const response = await axios.get(`${baseUrl}/KPIs`, { 
@@ -212,18 +264,23 @@ export const api = {
         return [];
       }
 
-      // Log the first record to see its structure
-      console.log('First KPI record structure:', JSON.stringify(response.data.records[0], null, 2));
-
       return response.data.records.map((record: any) => ({
         ID_KPI: sanitizeString(record.id),
         Nom_KPI: sanitizeString(record.fields.Nom_KPI),
-        Type: sanitizeString(record.fields.Type),
+        Type: sanitizeString(record.fields.Type) as 'Input' | 'Output',
         Valeur_Actuelle: sanitizeNumber(record.fields.Valeur_Actuelle),
         Valeur_Precedente: sanitizeNumber(record.fields.Valeur_Precedente || 0),
         Score_KPI_Final: sanitizeNumber(record.fields.Score_KPI_Final),
         Statut: sanitizeString(record.fields.Statut || 'OK'),
-        Fonctions: sanitizeString(record.fields.Fonctions_Readable || 'N/A')
+        Fonctions: sanitizeString(record.fields.Fonctions_Readable || 'N/A'),
+        Impact_Weight: sanitizeNumber(record.fields.Impact_Weight || 1),
+        Category_Weight: sanitizeNumber(record.fields.Category_Weight || 1),
+        Impact_Type: sanitizeString(record.fields.Impact_Type || 'Linear') as 'Linear' | 'Exponential',
+        Impact_Direction: sanitizeString(record.fields.Impact_Direction || 'Direct') as 'Direct' | 'Inverse',
+        Baseline_Revenue: sanitizeNumber(record.fields.Baseline_Revenue || 1000000),
+        Baseline_EBITDA: sanitizeNumber(record.fields.Baseline_EBITDA || 200000),
+        Scaling_Factor: sanitizeNumber(record.fields.Scaling_Factor || 1),
+        EBITDA_Factor: sanitizeNumber(record.fields.EBITDA_Factor || 0.2)
       }));
     } catch (error) {
       console.error('Error fetching KPIs:', error);
@@ -237,6 +294,64 @@ export const api = {
         }
       }
       throw new Error('Failed to fetch KPIs');
+    }
+  },
+
+  async fetchKPIsBenchmark(): Promise<KPI[]> {
+    try {
+      console.log('🔍 Fetching KPIs Benchmark...');
+      const response = await axios.get(`${baseUrl}/KPIs_Benchmark`, { 
+        headers,
+        params: {
+          sort: [
+            { field: 'Fonctions_Sort', direction: 'asc' },
+            { field: 'Nom_KPI_Sort', direction: 'asc' }
+          ]
+        }
+      });
+
+      if (!response.data.records) {
+        console.log('❌ No records found in KPIs_Benchmark');
+        return [];
+      }
+
+      console.log('📊 Found records:', response.data.records.length);
+      
+      return response.data.records.map((record: any) => {
+        const kpi = {
+          ID_KPI: sanitizeString(record.fields.KPI_ID),
+          Nom_KPI: sanitizeString(record.fields.Nom_KPI),
+          Fonctions: sanitizeString(record.fields.Fonctions_Sort),
+          Type: sanitizeString(record.fields.KPI_Type || 'Input') as 'Input' | 'Output',
+          Valeur_Actuelle: sanitizeNumber(record.fields.Current_Values),
+          Valeur_Precedente: sanitizeNumber(record.fields.Previous_Value),
+          Impact_Weight: sanitizeNumber(record.fields.Impact_Weight),
+          Category_Weight: sanitizeNumber(record.fields.Category_Weight),
+          Impact_Type: sanitizeString(record.fields.Impact_Type || 'Linear') as 'Linear' | 'Exponential',
+          Impact_Direction: sanitizeString(record.fields.Impact_Direction || 'Direct') as 'Direct' | 'Inverse',
+          Baseline_Revenue: sanitizeNumber(record.fields.Baseline_Revenue),
+          Baseline_EBITDA: sanitizeNumber(record.fields.Baseline_EBITDA),
+          Scaling_Factor: sanitizeNumber(record.fields.Scaling_Factor),
+          EBITDA_Factor: sanitizeNumber(record.fields.EBITDA_Factor),
+          Min_Benchmark: sanitizeNumber(record.fields.Min_Benchmark),
+          Max_Benchmark: sanitizeNumber(record.fields.Max_Benchmark),
+          Dependencies: sanitizeString(record.fields.Dependencies)
+        };
+        console.log('📎 Processing KPI:', kpi.Nom_KPI, kpi);
+        return kpi;
+      });
+    } catch (error) {
+      console.error('❌ Error fetching KPIs Benchmark:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Response:', error.response?.data);
+        if (error.response?.status === 404) {
+          throw new Error('KPIs_Benchmark table not found. Please check your Airtable configuration.');
+        }
+        if (error.response?.status === 401) {
+          throw new Error('Invalid Airtable API key. Please check your configuration.');
+        }
+      }
+      throw new Error('Failed to fetch KPIs Benchmark');
     }
   },
 
@@ -359,23 +474,40 @@ export const api = {
     Status?: Status; 
     Criticality?: Priority;
     Comments?: string;
+    Score?: number;
   }): Promise<void> {
     try {
       const updatePayload = {
         fields: {
           ...(updates.Status && { Status: updates.Status }),
           ...(updates.Criticality && { Criticality: updates.Criticality }),
-          ...(updates.Comments && { Comments: updates.Comments })
+          ...(updates.Comments && { Comments: updates.Comments }),
+          ...(updates.Score !== undefined && { Score: updates.Score })
         }
       };
 
-      await axios.patch(
-        `${baseUrl}/Audit/${id}`,
+      console.log('Sending update to Airtable:', {
+        url: `${baseUrl}/Audit_Items/${id}`,
+        payload: updatePayload,
+        headers
+      });
+
+      const response = await axios.patch(
+        `${baseUrl}/Audit_Items/${id}`,
         updatePayload,
         { headers }
       );
+
+      console.log('Airtable response:', response.data);
     } catch (error) {
       console.error('Error updating audit item:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+      }
       throw error;
     }
   }

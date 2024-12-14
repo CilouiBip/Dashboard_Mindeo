@@ -54,52 +54,17 @@ const KPIGroupCard: React.FC<KPIGroupCardProps> = ({
       </button>
 
       {isExpanded && (
-        <div className="p-6 space-y-8">
-          {principalKPIs.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <h3 className="text-lg font-medium text-gray-400">KPIs Principaux</h3>
-                {functionScore !== undefined && (
-                  <span className={`text-lg font-medium ${getScoreColor(functionScore)}`}>
-                    {formatNumber(functionScore)}
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {principalKPIs.map(kpi => (
-                  <KPICard
-                    key={kpi.ID_KPI}
-                    kpi={kpi}
-                    onUpdate={onUpdate}
-                    isUpdating={isUpdating}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {secondaryKPIs.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <h3 className="text-lg font-medium text-gray-400">KPIs Secondaires</h3>
-                {functionScore !== undefined && (
-                  <span className={`text-lg font-medium ${getScoreColor(functionScore)}`}>
-                    {formatNumber(functionScore)}
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {secondaryKPIs.map(kpi => (
-                  <KPICard
-                    key={kpi.ID_KPI}
-                    kpi={kpi}
-                    onUpdate={onUpdate}
-                    isUpdating={isUpdating}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...principalKPIs, ...secondaryKPIs].map(kpi => (
+              <KPICard
+                key={kpi.ID_KPI}
+                kpi={kpi}
+                onUpdate={onUpdate}
+                isUpdating={isUpdating}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

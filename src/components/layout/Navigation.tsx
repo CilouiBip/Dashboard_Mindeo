@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BarChart2, FileSpreadsheet } from 'lucide-react';
+import { LayoutDashboard, BarChart2, FileSpreadsheet, TrendingUp, ListChecks, CheckSquare, FileText, LineChart } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
@@ -25,6 +25,14 @@ const Navigation = () => {
         <Link to="/audit" className={getNavItemClass('/audit')}>
           <FileSpreadsheet className="h-5 w-5" />
           <span className="font-medium">Audit</span>
+        </Link>
+        <Link to="/actions" className={getNavItemClass('/actions')}>
+          <FileText className="h-5 w-5" />
+          <span className="font-medium">Liste Complète</span>
+        </Link>
+        <Link to="/simulator" className={getNavItemClass('/simulator')}>
+          <LineChart className="h-5 w-5" />
+          <span className="font-medium">Simulateur</span>
         </Link>
       </div>
     </nav>

@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface UIConfig {
+  appTitle: string;
+  appLogo: string;
+  headerLogo: string;
   kpiPageTitle: string;
   kpiUpdateTitle: string;
   kpiSearchPlaceholder: string;
@@ -11,6 +14,9 @@ interface UIConfig {
 }
 
 const defaultUIConfig: UIConfig = {
+  appTitle: 'Infopreneur Business Health',
+  appLogo: '',
+  headerLogo: '',
   kpiPageTitle: 'KPIs',
   kpiUpdateTitle: 'Update KPIs',
   kpiSearchPlaceholder: 'Search KPIs or functions...',
@@ -24,17 +30,19 @@ const defaultUIConfig: UIConfig = {
     Product: 'Product',
     HR: 'HR',
     Sales: 'Sales'
-  }
+  },
 };
 
 interface UIConfigContextType {
   uiConfig: UIConfig;
+  updateConfig: (newConfig: Partial<UIConfig>) => void;
   getFunctionLabel: (key: string) => string;
 }
 
 const UIConfigContext = createContext<UIConfigContextType>({
   uiConfig: defaultUIConfig,
-  getFunctionLabel: (key: string) => key
+  updateConfig: () => {},
+  getFunctionLabel: (key: string) => key,
 });
 
 export const useUIConfig = () => useContext(UIConfigContext);
@@ -49,12 +57,19 @@ export const UIConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
+  const updateConfig = (newConfig: Partial<UIConfig>) => {
+    setUIConfig(prev => ({
+      ...prev,
+      ...newConfig,
+    }));
+  };
+
   const getFunctionLabel = (key: string): string => {
     return uiConfig.functionLabels[key] || key;
   };
 
   return (
-    <UIConfigContext.Provider value={{ uiConfig, getFunctionLabel }}>
+    <UIConfigContext.Provider value={{ uiConfig, updateConfig, getFunctionLabel }}>
       {children}
     </UIConfigContext.Provider>
   );
