@@ -1,16 +1,32 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import path from 'path';
 
 export default defineConfig({
-  base: '/Dashboard_Mindeo/',
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': '/src'
+    },
+    dedupe: ['react', 'react-dom'],
+    preserveSymlinks: true
+  },
   build: {
+    target: 'es2015',
+    outDir: 'dist',
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true
+    },
+    sourcemap: true,
+    rollupOptions: {
+      external: ['recharts'], // Tell Rollup to treat "recharts" as an external dependency
     }
+  },
+  server: {
+    port: 3000
+  },
+  optimizeDeps: {
+    include: ['recharts', '@tanstack/react-query', 'lucide-react']
   }
 });

@@ -1,10 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Card } from '../components/ui/card';
-import { LinePath } from '@visx/shape';
-import { scaleLinear, scaleTime } from '@visx/scale';
-import { Group } from '@visx/group';
-import { AxisLeft, AxisBottom } from '@visx/axis';
-import { GridRows, GridColumns } from '@visx/grid';
+import { Card } from '../components/ui/Card';
 import { Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/airtable';
@@ -12,6 +7,7 @@ import { KPI } from '../types/airtable';
 import KPISimulatorCard from '../components/simulator/KPISimulatorCard';
 import FunctionHeader from '../components/simulator/FunctionHeader';
 import { calculateKPIImpact, calculateTotalImpact, formatCurrency } from '../utils/impactCalculations';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const ImpactSimulator = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -166,7 +162,16 @@ const ImpactSimulator = () => {
         <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
           <h3 className="text-lg font-semibold text-gray-200 mb-2">Impact Evolution</h3>
           <div className="h-[200px]">
-            {/* TODO: Implement chart with @visx/visx */}
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="revenue" stroke="#8884d8" activeDot={{ r: 8 }} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </Card>
       </div>
