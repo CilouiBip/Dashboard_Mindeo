@@ -69,19 +69,6 @@ const ImpactSimulator = () => {
       });
   }, [kpis, searchQuery]);
 
-  // Group KPIs by function
-  const groupedKPIs = useMemo(() => {
-    console.log('📊 Grouping KPIs:', filteredKPIs.length, 'KPIs');
-    return filteredKPIs.reduce((acc, kpi) => {
-      const functions = kpi.Fonctions.split(',').map(f => f.trim());
-      functions.forEach(func => {
-        if (!acc[func]) acc[func] = [];
-        acc[func].push(kpi);
-      });
-      return acc;
-    }, {} as Record<string, KPI[]>);
-  }, [filteredKPIs]);
-
   // Calculate impacts
   const impacts = useMemo(() => {
     return filteredKPIs.map(kpi => ({
@@ -95,36 +82,10 @@ const ImpactSimulator = () => {
     [impacts]
   );
 
-  // Simplified chart component
-  const ImpactChart = ({ initialValue, projectedValue }: { initialValue: number, projectedValue: number }) => (
-    <div className="relative h-[200px] w-full bg-[#1C1D24] p-4 rounded-lg">
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-[#2D2E3A]" />
-      <div className="absolute bottom-4 left-4 text-sm text-gray-400">Initial</div>
-      <div className="absolute bottom-4 right-4 text-sm text-gray-400">Projected</div>
-      <div className="flex justify-between items-end h-full pb-8">
-        <div className="flex flex-col items-center">
-          <div className="text-violet-400">{formatCurrency(initialValue)}</div>
-          <div className="w-2 h-2 rounded-full bg-violet-400 mt-2" />
-        </div>
-        <div className="flex flex-col items-center">
-          <div className="text-violet-400">{formatCurrency(projectedValue)}</div>
-          <div className="w-2 h-2 rounded-full bg-violet-400 mt-2" />
-        </div>
-      </div>
-    </div>
-  );
-
   const handleValueChange = (kpiId: string, value: number) => {
     setKpiValues(prev => ({
       ...prev,
       [kpiId]: value
-    }));
-  };
-
-  const toggleSection = (functionName: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [functionName]: !prev[functionName]
     }));
   };
 
@@ -145,85 +106,48 @@ const ImpactSimulator = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      {/* Impact Cards and Chart Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Revenue Impact Card */}
-        <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
-          <h3 className="text-lg font-semibold text-gray-200 mb-2">Revenue Impact Total</h3>
-          <div className={`text-2xl font-bold ${totalImpact.revenue >= 0 ? 'text-violet-400' : 'text-red-400'}`}>
-            {formatCurrency(totalImpact.revenue)}
-          </div>
-          <div className={`text-sm ${totalImpact.revenue >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {((totalImpact.revenue / 1000000) * 100).toFixed(1)}%
-          </div>
-        </Card>
-
-        {/* EBITDA Impact Card */}
-        <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
-          <h3 className="text-lg font-semibold text-gray-200 mb-2">EBITDA Impact Total</h3>
-          <div className={`text-2xl font-bold ${totalImpact.ebitda >= 0 ? 'text-violet-400' : 'text-red-400'}`}>
-            {formatCurrency(totalImpact.ebitda)}
-          </div>
-          <div className={`text-sm ${totalImpact.ebitda >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {((totalImpact.ebitda / 1000000) * 100).toFixed(1)}%
-          </div>
-        </Card>
-
-        {/* Impact Evolution Chart */}
-        <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
-          <h3 className="text-lg font-semibold text-gray-200 mb-4">Impact Evolution</h3>
-          <ImpactChart 
-            initialValue={0} 
-            projectedValue={totalImpact.revenue} 
+    <div className="container mx-auto p-4">
+      <FunctionHeader />
+      
+      <div className="grid gap-4 mt-4">
+        {/* Search and Filter */}
+        <div className="flex gap-4 items-center">
+          <input
+            type="text"
+            placeholder="Search KPIs..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-sm"
           />
-        </Card>
-      </div>
+        </div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search KPIs..."
-          className="w-full pl-10 pr-4 py-2 bg-[#1C1D24] border border-[#2D2E3A] rounded-lg text-gray-200 focus:outline-none focus:border-violet-500"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      {/* KPI Groups */}
-      <div className="space-y-4">
-        {Object.entries(groupedKPIs).map(([functionName, functionKPIs]) => (
-          <div key={functionName} className="space-y-2">
-            <FunctionHeader
-              name={functionName || 'N/A'}
-              count={functionKPIs.length}
-              isExpanded={expandedSections[functionName] ?? false}
-              onToggle={() => setExpandedSections(prev => ({
-                ...prev,
-                [functionName]: !prev[functionName]
-              }))}
+        {/* KPI Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredKPIs.map((kpi) => (
+            <KPISimulatorCard
+              key={kpi.ID_KPI}
+              kpi={kpi}
+              value={kpiValues[kpi.ID_KPI] || 0}
+              onValueChange={(value) => handleValueChange(kpi.ID_KPI, value)}
             />
-            
-            {expandedSections[functionName] && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {functionKPIs.map(kpi => (
-                  <KPISimulatorCard
-                    key={kpi.ID_KPI}
-                    kpi={kpi}
-                    currentValue={kpiValues[kpi.ID_KPI] ?? kpi.Valeur_Actuelle}
-                    onValueChange={(value) => setKpiValues(prev => ({
-                      ...prev,
-                      [kpi.ID_KPI]: value
-                    }))}
-                    impact={impacts.find(i => i.kpiId === kpi.ID_KPI)?.impact || { revenue: 0, ebitda: 0 }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* Total Impact Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
+            <h3 className="text-lg font-semibold text-gray-200">Total Revenue Impact</h3>
+            <p className="text-2xl font-bold text-violet-400 mt-2">
+              {formatCurrency(totalImpact.revenue)}
+            </p>
+          </Card>
+          <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
+            <h3 className="text-lg font-semibold text-gray-200">Total EBITDA Impact</h3>
+            <p className="text-2xl font-bold text-violet-400 mt-2">
+              {formatCurrency(totalImpact.ebitda)}
+            </p>
+          </Card>
+        </div>
       </div>
     </div>
   );
