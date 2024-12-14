@@ -133,6 +133,14 @@ const ImpactSimulator = () => {
           ))}
         </div>
 
+        {/* Impact Evolution Chart */}
+        <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
+          <h3 className="text-lg font-semibold text-gray-200 mb-2">Impact Evolution</h3>
+          <div className="h-[200px] flex items-center justify-center">
+            <span className="text-gray-400">Graph coming soon</span>
+          </div>
+        </Card>
+
         {/* Total Impact Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
