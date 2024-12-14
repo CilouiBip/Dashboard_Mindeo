@@ -510,5 +510,54 @@ export const api = {
       }
       throw error;
     }
+  },
+
+  async fetchProjectPlanItems() {
+    try {
+      console.log('🔍 Fetching project plan items');
+      
+      const response = await axios.get(`${baseUrl}/Audit_Items`, { 
+        headers,
+        params: {
+          filterByFormula: 'AND({Action_Required} != "", Score < 4)',
+          sort: [
+            { field: 'Fonction_Name', direction: 'asc' },
+            { field: 'Problems_Name', direction: 'asc' },
+            { field: 'Sub_Problems_Text', direction: 'asc' }
+          ],
+          pageSize: 100
+        }
+      });
+
+      let allRecords = [...response.data.records];
+      let offset = response.data.offset;
+      
+      while (offset) {
+        const nextPage = await axios.get(`${baseUrl}/Audit_Items`, {
+          headers,
+          params: {
+            offset,
+            filterByFormula: 'AND({Action_Required} != "", Score < 4)',
+            sort: [
+              { field: 'Fonction_Name', direction: 'asc' },
+              { field: 'Problems_Name', direction: 'asc' },
+              { field: 'Sub_Problems_Text', direction: 'asc' }
+            ],
+            pageSize: 100
+          }
+        });
+        
+        allRecords = [...allRecords, ...nextPage.data.records];
+        offset = nextPage.data.offset;
+      }
+
+      return allRecords.map(record => ({
+        Item_ID: record.id,
+        ...record.fields,
+      }));
+    } catch (error) {
+      console.error('Error fetching project plan items:', error);
+      throw error;
+    }
   }
 };

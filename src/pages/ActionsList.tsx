@@ -153,15 +153,15 @@ const ActionsList = () => {
   const getNodeStyle = (level: HierarchyNode['level']) => {
     switch (level) {
       case 'function':
-        return 'bg-gradient-to-r from-gray-800 to-gray-700 shadow-lg text-lg font-semibold py-5 px-7';
+        return 'bg-[#1F2937]/35 hover:bg-[#1F2937] text-lg font-semibold p-4';
       case 'problem':
-        return 'bg-gradient-to-r from-gray-700/90 to-gray-600/90 text-base font-medium py-4 px-6';
+        return 'bg-[#1F2937]/25 hover:bg-[#1F2937] text-base font-medium p-4';
       case 'subproblem':
-        return 'bg-gradient-to-r from-gray-700/70 to-gray-600/70 text-sm py-3 px-5';
+        return 'bg-[#1F2937]/15 hover:bg-[#1F2937] text-sm p-4';
       case 'category':
-        return 'bg-gradient-to-r from-gray-700/50 to-gray-600/50 text-sm py-3 px-5';
+        return 'bg-[#1F2937]/10 hover:bg-[#1F2937] text-sm p-4';
       default:
-        return 'bg-gradient-to-r from-gray-700/30 to-gray-600/30 text-sm';
+        return 'bg-[#1F2937]/10 hover:bg-[#1F2937] text-sm p-4';
     }
   };
 
@@ -170,12 +170,11 @@ const ActionsList = () => {
     const hasChildren = Object.keys(node.children).length > 0 || (node.items && node.items.length > 0);
 
     return (
-      <div key={path} className="rounded-lg overflow-hidden transition-all duration-150 hover:translate-x-0.5">
+      <div key={path} className="transition-all duration-150">
         <div 
           className={clsx(
-            'flex items-center justify-between cursor-pointer transition-all duration-150',
+            'flex items-center justify-between cursor-pointer rounded-lg transition-colors',
             getNodeStyle(node.level),
-            'hover:brightness-105',
             level > 0 && 'mt-2'
           )}
           onClick={() => toggleSection(path)}

@@ -134,90 +134,90 @@ const ImpactSimulator = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
+      {/* Impact Cards and Chart Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Revenue Impact Card */}
+        <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
+          <h3 className="text-lg font-semibold text-gray-200 mb-2">Revenue Impact Total</h3>
+          <div className={`text-2xl font-bold ${totalImpact.revenue >= 0 ? 'text-violet-400' : 'text-red-400'}`}>
+            {formatCurrency(totalImpact.revenue)}
+          </div>
+          <div className={`text-sm ${totalImpact.revenue >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {((totalImpact.revenue / 1000000) * 100).toFixed(1)}%
+          </div>
+        </Card>
+
+        {/* EBITDA Impact Card */}
+        <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
+          <h3 className="text-lg font-semibold text-gray-200 mb-2">EBITDA Impact Total</h3>
+          <div className={`text-2xl font-bold ${totalImpact.ebitda >= 0 ? 'text-violet-400' : 'text-red-400'}`}>
+            {formatCurrency(totalImpact.ebitda)}
+          </div>
+          <div className={`text-sm ${totalImpact.ebitda >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {((totalImpact.ebitda / 1000000) * 100).toFixed(1)}%
+          </div>
+        </Card>
+
+        {/* Impact Evolution Chart */}
+        <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
+          <h3 className="text-lg font-semibold text-gray-200 mb-2">Impact Evolution</h3>
+          <div className="h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2D2E3A" />
+                <XAxis dataKey="name" stroke="#9CA3AF" />
+                <YAxis stroke="#9CA3AF" reversed />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#1C1D24', border: '1px solid #2D2E3A' }}
+                  labelStyle={{ color: '#9CA3AF' }}
+                />
+                <Legend />
+                <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#8B5CF6" strokeWidth={2} />
+                <Line type="monotone" dataKey="ebitda" name="EBITDA" stroke="#10B981" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
       {/* Search Bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <input
           type="text"
-          placeholder="Rechercher un KPI..."
-          className="w-full pl-10 pr-4 py-2 rounded-lg bg-[#1C1D24] border border-[#2D2E3A] text-gray-200 focus:outline-none focus:border-violet-500"
+          placeholder="Search KPIs..."
+          className="w-full pl-10 pr-4 py-2 bg-[#1C1D24] border border-[#2D2E3A] rounded-lg text-gray-200 focus:outline-none focus:border-violet-500"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      {/* Impact Summary */}
-      <Card className="p-6 bg-[#1C1D24] border-[#2D2E3A]">
-        <h2 className="text-xl font-semibold text-gray-200 mb-4">Impact Total</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <p className="text-gray-400">Impact sur le Revenue</p>
-            <p className="text-2xl font-bold text-violet-400">
-              {formatCurrency(totalImpact.revenue)}
-            </p>
-          </div>
-          <div>
-            <p className="text-gray-400">Impact sur l'EBITDA</p>
-            <p className="text-2xl font-bold text-violet-400">
-              {formatCurrency(totalImpact.ebitda)}
-            </p>
-          </div>
-        </div>
-        
-        {/* Impact Chart */}
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2D2E3A" />
-              <XAxis dataKey="name" stroke="#9CA3AF" />
-              <YAxis stroke="#9CA3AF" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1C1D24',
-                  border: '1px solid #2D2E3A',
-                  borderRadius: '0.5rem'
-                }}
-              />
-              <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#8B5CF6" 
-                name="Revenue" 
-                strokeWidth={2}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="ebitda" 
-                stroke="#EC4899" 
-                name="EBITDA" 
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
-
-      {/* KPI Sections */}
-      <div className="space-y-6">
+      {/* KPI Groups */}
+      <div className="space-y-4">
         {Object.entries(groupedKPIs).map(([functionName, functionKPIs]) => (
-          <div key={functionName} className="space-y-4">
+          <div key={functionName} className="space-y-2">
             <FunctionHeader
-              title={functionName}
-              kpiCount={functionKPIs.length}
-              isExpanded={expandedSections[functionName]}
-              onToggle={() => toggleSection(functionName)}
+              name={functionName || 'N/A'}
+              count={functionKPIs.length}
+              isExpanded={expandedSections[functionName] ?? false}
+              onToggle={() => setExpandedSections(prev => ({
+                ...prev,
+                [functionName]: !prev[functionName]
+              }))}
             />
             
             {expandedSections[functionName] && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {functionKPIs.map((kpi) => (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {functionKPIs.map(kpi => (
                   <KPISimulatorCard
                     key={kpi.ID_KPI}
                     kpi={kpi}
                     currentValue={kpiValues[kpi.ID_KPI] ?? kpi.Valeur_Actuelle}
-                    onValueChange={(value) => handleValueChange(kpi.ID_KPI, value)}
-                    impact={calculateKPIImpact(kpi, kpiValues[kpi.ID_KPI] ?? kpi.Valeur_Actuelle)}
+                    onValueChange={(value) => setKpiValues(prev => ({
+                      ...prev,
+                      [kpi.ID_KPI]: value
+                    }))}
+                    impact={impacts.find(i => i.kpiId === kpi.ID_KPI)?.impact || { revenue: 0, ebitda: 0 }}
                   />
                 ))}
               </div>
