@@ -7,7 +7,6 @@ import { KPI } from '../types/airtable';
 import KPISimulatorCard from '../components/simulator/KPISimulatorCard';
 import FunctionHeader from '../components/simulator/FunctionHeader';
 import { calculateKPIImpact, calculateTotalImpact, formatCurrency } from '../utils/impactCalculations';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const ImpactSimulator = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,11 +95,24 @@ const ImpactSimulator = () => {
     [impacts]
   );
 
-  // Chart data
-  const chartData = [
-    { name: 'Initial', revenue: 0, ebitda: 0 },
-    { name: 'Impact', revenue: totalImpact.revenue, ebitda: totalImpact.ebitda }
-  ];
+  // Simplified chart component
+  const ImpactChart = ({ initialValue, projectedValue }: { initialValue: number, projectedValue: number }) => (
+    <div className="relative h-[200px] w-full bg-[#1C1D24] p-4 rounded-lg">
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-[#2D2E3A]" />
+      <div className="absolute bottom-4 left-4 text-sm text-gray-400">Initial</div>
+      <div className="absolute bottom-4 right-4 text-sm text-gray-400">Projected</div>
+      <div className="flex justify-between items-end h-full pb-8">
+        <div className="flex flex-col items-center">
+          <div className="text-violet-400">{formatCurrency(initialValue)}</div>
+          <div className="w-2 h-2 rounded-full bg-violet-400 mt-2" />
+        </div>
+        <div className="flex flex-col items-center">
+          <div className="text-violet-400">{formatCurrency(projectedValue)}</div>
+          <div className="w-2 h-2 rounded-full bg-violet-400 mt-2" />
+        </div>
+      </div>
+    </div>
+  );
 
   const handleValueChange = (kpiId: string, value: number) => {
     setKpiValues(prev => ({
@@ -160,19 +172,11 @@ const ImpactSimulator = () => {
 
         {/* Impact Evolution Chart */}
         <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
-          <h3 className="text-lg font-semibold text-gray-200 mb-2">Impact Evolution</h3>
-          <div className="h-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="revenue" stroke="#8884d8" activeDot={{ r: 8 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-200 mb-4">Impact Evolution</h3>
+          <ImpactChart 
+            initialValue={0} 
+            projectedValue={totalImpact.revenue} 
+          />
         </Card>
       </div>
 
