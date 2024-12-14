@@ -13,6 +13,14 @@ export default defineConfig({
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true
+    },
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: {
+          recharts: ['recharts']
+        }
+      }
     }
   }
 });
