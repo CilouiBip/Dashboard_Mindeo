@@ -20,7 +20,7 @@ export default defineConfig({
     },
     sourcemap: true,
     rollupOptions: {
-      external: ['recharts'], // Tell Rollup to treat "recharts" as an external dependency
+      // Removed external: ['recharts']
     }
   },
   server: {
