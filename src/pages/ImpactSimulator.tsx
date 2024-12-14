@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Card } from '../components/ui/Card';
+import { Card } from '../components/ui/card';
 import { LinePath } from '@visx/shape';
 import { scaleLinear, scaleTime } from '@visx/scale';
 import { Group } from '@visx/group';
