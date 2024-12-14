@@ -1,13 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { Card } from '../components/ui/Card';
-import LineChart from 'recharts/lib/chart/LineChart';
-import Line from 'recharts/lib/cartesian/Line';
-import XAxis from 'recharts/lib/cartesian/XAxis';
-import YAxis from 'recharts/lib/cartesian/YAxis';
-import CartesianGrid from 'recharts/lib/cartesian/CartesianGrid';
-import Tooltip from 'recharts/lib/component/Tooltip';
-import Legend from 'recharts/lib/component/Legend';
-import ResponsiveContainer from 'recharts/lib/component/ResponsiveContainer';
+import { LinePath } from '@visx/shape';
+import { scaleLinear, scaleTime } from '@visx/scale';
+import { Group } from '@visx/group';
+import { AxisLeft, AxisBottom } from '@visx/axis';
+import { GridRows, GridColumns } from '@visx/grid';
 import { Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/airtable';
@@ -169,20 +166,7 @@ const ImpactSimulator = () => {
         <Card className="p-4 bg-[#1C1D24] border-[#2D2E3A]">
           <h3 className="text-lg font-semibold text-gray-200 mb-2">Impact Evolution</h3>
           <div className="h-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2D2E3A" />
-                <XAxis dataKey="name" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" reversed />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1C1D24', border: '1px solid #2D2E3A' }}
-                  labelStyle={{ color: '#9CA3AF' }}
-                />
-                <Legend />
-                <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#8B5CF6" strokeWidth={2} />
-                <Line type="monotone" dataKey="ebitda" name="EBITDA" stroke="#10B981" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
+            {/* TODO: Implement chart with @visx/visx */}
           </div>
         </Card>
       </div>
