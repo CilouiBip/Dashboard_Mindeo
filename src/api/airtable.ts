@@ -195,6 +195,71 @@ export const api = {
     }
   },
 
+  async fetchFullList() {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1000;
+
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        console.log('🔍 Attempting to fetch full list items - Attempt', attempt + 1);
+        
+        const response = await axios.get(`${baseUrl}/Liste_Complete`, { 
+          headers,
+          params: {
+            sort: [
+              { field: 'Fonction_Name', direction: 'asc' },
+              { field: 'Problems_Name', direction: 'asc' },
+              { field: 'Categorie_Problems_Name', direction: 'asc' }
+            ],
+            pageSize: 100
+          }
+        });
+
+        let allRecords = [...response.data.records];
+        let offset = response.data.offset;
+        let pageCount = 1;
+        
+        while (offset) {
+          console.log(`📑 Fetching page ${pageCount + 1}...`);
+          await delay(200);
+          
+          const nextPage = await axios.get(`${baseUrl}/Liste_Complete`, {
+            headers,
+            params: {
+              offset,
+              sort: [
+                { field: 'Fonction_Name', direction: 'asc' },
+                { field: 'Problems_Name', direction: 'asc' },
+                { field: 'Categorie_Problems_Name', direction: 'asc' }
+              ]
+            }
+          });
+          
+          allRecords = [...allRecords, ...nextPage.data.records];
+          offset = nextPage.data.offset;
+          pageCount++;
+        }
+
+        return allRecords.map(record => ({
+          id: record.id,
+          ...record.fields,
+          Status: sanitizeString(record.fields.Status),
+          Criticality: sanitizeString(record.fields.Criticality),
+          Score: sanitizeNumber(record.fields.Score)
+        }));
+
+      } catch (error) {
+        console.error('Error fetching full list:', error);
+        if (attempt === MAX_RETRIES - 1) throw error;
+        await delay(RETRY_DELAY);
+      }
+    }
+
+    throw new Error('Failed to fetch full list after multiple attempts');
+  },
+
   async fetchKPIs(): Promise<KPI[]> {
     try {
       const response = await axios.get(`${baseUrl}/KPIs`, { 
