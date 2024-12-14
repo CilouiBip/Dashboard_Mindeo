@@ -32,6 +32,8 @@ jobs:
         env:
           VITE_AIRTABLE_API_KEY: ${{ secrets.VITE_AIRTABLE_API_KEY }}
           VITE_AIRTABLE_BASE_ID: ${{ secrets.VITE_AIRTABLE_BASE_ID }}
+          VITE_FOO: ${{ secrets.VITE_FOO }}
+          VITE_BAR: ${{ secrets.VITE_BAR }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
