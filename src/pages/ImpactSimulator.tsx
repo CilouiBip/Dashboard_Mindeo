@@ -1,6 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Card } from '../components/ui/Card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import LineChart from 'recharts/lib/chart/LineChart';
+import Line from 'recharts/lib/cartesian/Line';
+import XAxis from 'recharts/lib/cartesian/XAxis';
+import YAxis from 'recharts/lib/cartesian/YAxis';
+import CartesianGrid from 'recharts/lib/cartesian/CartesianGrid';
+import Tooltip from 'recharts/lib/component/Tooltip';
+import Legend from 'recharts/lib/component/Legend';
+import ResponsiveContainer from 'recharts/lib/component/ResponsiveContainer';
 import { Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/airtable';

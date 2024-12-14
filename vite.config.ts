@@ -14,15 +14,10 @@ export default defineConfig({
       transformMixedEsModules: true
     },
     rollupOptions: {
-      external: [],
+      external: ['recharts'],
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('recharts') || id.includes('d3')) {
-              return 'recharts';
-            }
-            return 'vendor';
-          }
+        globals: {
+          recharts: 'Recharts'
         }
       }
     }
@@ -31,6 +26,6 @@ export default defineConfig({
     alias: {
       'recharts': 'recharts/es6'
     },
-    dedupe: ['react', 'react-dom', 'recharts']
+    dedupe: ['react', 'react-dom']
   }
 });
