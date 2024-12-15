@@ -1,6 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BarChart2, FileSpreadsheet, TrendingUp, ListChecks, CheckSquare, FileText, LineChart, ClipboardList } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  BarChart2, 
+  ClipboardCheck, 
+  FileText,
+  CalendarClock,
+  LineChart
+} from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
@@ -18,12 +25,12 @@ const Navigation = () => {
           <LayoutDashboard className="h-5 w-5" />
           <span className="font-medium">Dashboard</span>
         </Link>
-        <Link to="/kpis-mvd" className={getNavItemClass('/kpis-mvd')}>
+        <Link to="/kpis" className={getNavItemClass('/kpis')}>
           <BarChart2 className="h-5 w-5" />
           <span className="font-medium">KPIs</span>
         </Link>
         <Link to="/audit" className={getNavItemClass('/audit')}>
-          <FileSpreadsheet className="h-5 w-5" />
+          <ClipboardCheck className="h-5 w-5" />
           <span className="font-medium">Audit</span>
         </Link>
         <Link to="/actions" className={getNavItemClass('/actions')}>
@@ -31,7 +38,7 @@ const Navigation = () => {
           <span className="font-medium">Liste Complète</span>
         </Link>
         <Link to="/project-plan" className={getNavItemClass('/project-plan')}>
-          <ClipboardList className="h-5 w-5" />
+          <CalendarClock className="h-5 w-5" />
           <span className="font-medium">Project Plan</span>
         </Link>
         <Link to="/simulator" className={getNavItemClass('/simulator')}>

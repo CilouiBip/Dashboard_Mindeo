@@ -17,6 +17,50 @@ const sanitizeString = (value: any): string => {
   return String(value || '');
 };
 
+interface PriorityItem {
+  id: string;
+  Action_Required: string;
+  Item_Name: string;
+  Catégorie_Name_Link: string;
+  Sub_Problems_Text: string;
+  Problems_Name: string;
+  Status: string;
+  Item_ID: string | number;
+  Criticality: string;
+  KPIs_Name: string[];
+  KPIs_Status_: string[];
+  Fonction_Name: string;
+  Playbook_Link?: string;
+}
+
+interface ActionItem {
+  id: string;
+  action: string;
+  actionWeek: string;
+  status: string;
+}
+
+const mapRecord = (record: Record<string, any>): PriorityItem => {
+  const fields = record.fields;
+  console.log('Raw record fields:', fields); // Debug log
+
+  return {
+    id: record.id,
+    Action_Required: fields.Action_Required || '',
+    Item_Name: fields.Item_Name || '',
+    Catégorie_Name_Link: Array.isArray(fields.Categorie_Problems_Name) ? fields.Categorie_Problems_Name[0] : fields.Categorie_Problems_Name || '',
+    Sub_Problems_Text: fields.Sub_Problems_Text || '',
+    Problems_Name: Array.isArray(fields.Problems_Name) ? fields.Problems_Name[0] : fields.Problems_Name || '',
+    Status: fields.Status || 'Not Started',
+    Item_ID: fields.Item_ID || '',
+    Criticality: fields.Criticality || 'Low',
+    KPIs_Name: Array.isArray(fields.KPIs_Name) ? fields.KPIs_Name : [],
+    KPIs_Status_: Array.isArray(fields.KPIs_Status_) ? fields.KPIs_Status_ : [],
+    Fonction_Name: Array.isArray(fields.Fonction_Name) ? fields.Fonction_Name[0] : fields.Fonction_Name || '',
+    Playbook_Link: fields.Playbook_Link || ''
+  };
+};
+
 export const api = {
   async fetchGlobalScore(): Promise<GlobalScore> {
     try {
@@ -502,11 +546,7 @@ export const api = {
     } catch (error) {
       console.error('Error updating audit item:', error);
       if (axios.isAxiosError(error)) {
-        console.error('Error details:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          message: error.message
-        });
+        console.error('Error details:', error.response?.data);
       }
       throw error;
     }
@@ -514,17 +554,11 @@ export const api = {
 
   async fetchProjectPlanItems() {
     try {
-      console.log('🔍 Fetching project plan items');
+      console.log('🔍 Fetching project plan items from Airtable...');
       
-      const response = await axios.get(`${baseUrl}/Audit_Items`, { 
+      const response = await axios.get(`${baseUrl}/Actions_Priority`, { 
         headers,
         params: {
-          filterByFormula: 'AND({Action_Required} != "", Score < 4)',
-          sort: [
-            { field: 'Fonction_Name', direction: 'asc' },
-            { field: 'Problems_Name', direction: 'asc' },
-            { field: 'Sub_Problems_Text', direction: 'asc' }
-          ],
           pageSize: 100
         }
       });
@@ -533,16 +567,11 @@ export const api = {
       let offset = response.data.offset;
       
       while (offset) {
-        const nextPage = await axios.get(`${baseUrl}/Audit_Items`, {
+        console.log('Fetching next page with offset:', offset);
+        const nextPage = await axios.get(`${baseUrl}/Actions_Priority`, {
           headers,
           params: {
             offset,
-            filterByFormula: 'AND({Action_Required} != "", Score < 4)',
-            sort: [
-              { field: 'Fonction_Name', direction: 'asc' },
-              { field: 'Problems_Name', direction: 'asc' },
-              { field: 'Sub_Problems_Text', direction: 'asc' }
-            ],
             pageSize: 100
           }
         });
@@ -551,13 +580,122 @@ export const api = {
         offset = nextPage.data.offset;
       }
 
-      return allRecords.map(record => ({
-        Item_ID: record.id,
-        ...record.fields,
+      console.log('Total records fetched:', allRecords.length);
+
+      const mappedRecords = allRecords.map(record => ({
+        id: sanitizeString(record.id),
+        Action_Required: sanitizeString(record.fields["Action_Required (from Action_ID)"]),
+        Item_Name: sanitizeString(record.fields["Item_Name (from Action_ID)"]),
+        Catégorie_Name_Link: sanitizeString(record.fields["Catégorie_Name_Link"]),
+        Sub_Problems_Text: sanitizeString(record.fields["Sub_Problems_Text (from Action_ID)"]),
+        Problems_Name: sanitizeString(record.fields["Problems_Name (from Action_ID)"]),
+        Fonction_Name: sanitizeString(record.fields["Fonction_Name (from Action_ID)"])
       }));
+
+      console.log('Mapped records sample:', mappedRecords.slice(0, 2));
+      return mappedRecords;
+
     } catch (error) {
       console.error('Error fetching project plan items:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Axios error details:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
       throw error;
     }
-  }
+  },
+
+  async fetchPriorityItems(): Promise<ActionItem[]> {
+    try {
+      const response = await axios.get(`${baseUrl}/Actions_Priority`, { 
+        headers,
+        params: {
+          fields: ['Action_Required', 'Action_Week', 'Status_Actions_App'],
+        },
+      });
+
+      // Log complet d'un enregistrement pour voir sa structure
+      console.log('Sample record from Airtable:', JSON.stringify(response.data.records[0], null, 2));
+
+      const mappedRecords = response.data.records
+        .map((record: any) => {
+          const actionRequired = record.fields.Action_Required;
+          const actionText = Array.isArray(actionRequired) ? actionRequired[0] : '';
+          
+          return {
+            id: record.id,
+            action: actionText,
+            actionWeek: record.fields.Action_Week,
+            status: record.fields.Status_Actions_App || 'Not Started'
+          };
+        })
+        .filter(record => record.actionWeek === 'S1-2');
+
+      return mappedRecords;
+    } catch (error) {
+      console.error('Error fetching priority items:', error);
+      return [];
+    }
+  },
+
+  async fetchAverageScore(): Promise<number> {
+    try {
+      const response = await axios.get(`${baseUrl}/Actions_Priority`, { 
+        headers,
+        params: {
+          fields: ['Score'],
+        },
+      });
+
+      const scores = response.data.records
+        .map((record: any) => record.fields.Score)
+        .filter((score: any) => typeof score === 'number');
+
+      if (scores.length === 0) return 0;
+
+      const averageScore = scores.reduce((acc: number, curr: number) => acc + curr, 0) / scores.length;
+      return Number(averageScore.toFixed(1));
+    } catch (error) {
+      console.error('Error fetching average score:', error);
+      return 0;
+    }
+  },
+
+  async updateActionStatus(recordId: string, status: string): Promise<void> {
+    try {
+      const requestData = {
+        fields: {
+          Status_Actions_App: status
+        }
+      };
+      
+      console.log('Request data:', JSON.stringify(requestData, null, 2));
+      console.log('Request URL:', `${baseUrl}/Actions_Priority/${recordId}`);
+      console.log('Request headers:', headers);
+
+      const response = await axios.patch(
+        `${baseUrl}/Actions_Priority/${recordId}`,
+        requestData,
+        { 
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Update response:', response.data);
+    } catch (error) {
+      console.error('Error updating action status:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Full error response:', error.response?.data);
+        console.error('Error status:', error.response?.status);
+        console.error('Error headers:', error.response?.headers);
+      }
+      throw new Error('Failed to update action status');
+    }
+  },
 };

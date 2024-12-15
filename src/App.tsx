@@ -74,12 +74,12 @@ function App() {
               <main className="container mx-auto px-4">
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
-                  <Route path="/kpis-mvd" element={<KPIsMVD />} />
+                  <Route path="/kpis" element={<KPIsMVD />} />
                   <Route path="/audit" element={<AuditTabs auditItems={auditItems} onUpdate={refreshData} />} />
                   <Route path="/actions" element={<ActionsList />} />
                   <Route path="/project-plan" element={<ProjectPlan />} />
-                  <Route path="/admin" element={<AdminPage />} />
                   <Route path="/simulator" element={<ImpactSimulator />} />
+                  <Route path="/admin" element={<AdminPage />} />
                 </Routes>
               </main>
             </div>
