@@ -38,6 +38,8 @@ interface ActionItem {
   action: string;
   actionWeek: string;
   status: string;
+  itemName: string;
+  functionName: string;
 }
 
 const mapRecord = (record: Record<string, any>): PriorityItem => {
@@ -610,29 +612,52 @@ export const api = {
 
   async fetchPriorityItems(): Promise<ActionItem[]> {
     try {
-      const response = await axios.get(`${baseUrl}/Actions_Priority`, { 
-        headers,
-        params: {
-          fields: ['Action_Required', 'Action_Week', 'Status_Actions_App'],
-        },
-      });
+      let allRecords: any[] = [];
+      let offset: string | undefined = undefined;
+      
+      do {
+        const response = await axios.get(`${baseUrl}/Actions_Priority`, { 
+          headers,
+          params: {
+            fields: ['Action_Required', 'Action_Week', 'Status_Actions_App', 'Item_Name', 'Fonction_Name'],
+            filterByFormula: "NOT({Action_Week} = '')",
+            offset: offset,
+          },
+        });
 
-      // Log complet d'un enregistrement pour voir sa structure
-      console.log('Sample record from Airtable:', JSON.stringify(response.data.records[0], null, 2));
+        allRecords = [...allRecords, ...response.data.records];
+        offset = response.data.offset;
+      } while (offset);
 
-      const mappedRecords = response.data.records
+      console.log('Total records from Airtable:', allRecords.length);
+      console.log('Sample record from Airtable:', JSON.stringify(allRecords[0], null, 2));
+
+      const mappedRecords = allRecords
         .map((record: any) => {
           const actionRequired = record.fields.Action_Required;
-          const actionText = Array.isArray(actionRequired) ? actionRequired[0] : '';
+          const actionText = Array.isArray(actionRequired) ? actionRequired[0] : actionRequired || '';
+          const actionWeek = record.fields.Action_Week || '';
+          const itemName = Array.isArray(record.fields.Item_Name) ? record.fields.Item_Name[0] : record.fields.Item_Name || '';
+          const functionName = Array.isArray(record.fields.Fonction_Name) ? record.fields.Fonction_Name[0] : record.fields.Fonction_Name || '';
           
           return {
             id: record.id,
             action: actionText,
-            actionWeek: record.fields.Action_Week,
-            status: record.fields.Status_Actions_App || 'Not Started'
+            actionWeek: actionWeek,
+            status: record.fields.Status_Actions_App || 'Not Started',
+            itemName: itemName,
+            functionName: functionName
           };
         })
-        .filter(record => record.actionWeek === 'S1-2');
+        .filter(record => record.action && record.actionWeek);
+
+      console.log('Total mapped records:', mappedRecords.length);
+      console.log('Records by week:', 
+        mappedRecords.reduce((acc: any, curr) => {
+          acc[curr.actionWeek] = (acc[curr.actionWeek] || 0) + 1;
+          return acc;
+        }, {})
+      );
 
       return mappedRecords;
     } catch (error) {
