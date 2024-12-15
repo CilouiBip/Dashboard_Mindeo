@@ -37,4 +37,5 @@ export interface AuditItem {
   Fonction_Name: string;
   Score: number;
   Comments?: string;
+  KPIs_Name?: string;
 }

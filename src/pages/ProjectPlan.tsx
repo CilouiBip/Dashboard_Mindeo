@@ -3,52 +3,76 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/airtable';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
-import ProjectPlanView from '../components/project/ProjectPlanView';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
+import { Card } from '../components/ui/card';
+import PriorityView from '../components/project/PriorityView';
+import { ProjectTask } from '../types/project';
+
+// Types
+interface MetricCardProps {
+  title: string;
+  value: string | number;
+  description: string;
+}
+
+const MetricCard: React.FC<MetricCardProps> = ({ title, value, description }) => (
+  <Card className="p-4 bg-[#141517] border-[#2D2E3A]">
+    <h3 className="text-sm font-medium text-gray-400">{title}</h3>
+    <p className="text-2xl font-bold text-white mt-1">{value}</p>
+    <p className="text-sm text-gray-500 mt-1">{description}</p>
+  </Card>
+);
 
 const ProjectPlan = () => {
-  const { data: projectItems, isLoading, error } = useQuery({
-    queryKey: ['projectPlanItems'],
-    queryFn: async () => {
-      try {
-        console.log('🚀 Starting to fetch project plan items');
-        const items = await api.fetchProjectPlanItems();
-        console.log('📦 Fetched items:', items);
-        return items;
-      } catch (err) {
-        console.error('❌ Error fetching project plan items:', err);
-        throw err;
-      }
-    }
+  const { data: projectItems, isLoading, error } = useQuery<ProjectTask[]>({
+    queryKey: ['projectItems'],
+    queryFn: api.fetchProjectPlanItems,
   });
 
-  if (isLoading) {
-    console.log('⌛ Loading project plan items...');
-    return <LoadingSpinner />;
-  }
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error as Error} />;
+  if (!projectItems) return null;
+
+  // Calculer les métriques
+  const totalTasks = projectItems.length;
   
-  if (error) {
-    console.error('🔥 Project Plan Error:', error);
-    return <ErrorMessage error={error as Error} />;
-  }
-  
-  if (!projectItems?.length) {
-    console.log('ℹ️ No project items found');
-    return (
-      <div className="p-6 text-center">
-        <p className="text-gray-400">No action items requiring attention found.</p>
-      </div>
-    );
-  }
+  // Grouper par fonction
+  const tasksByFunction = projectItems.reduce((acc, task) => {
+    const functionName = task["Fonction_Name (from Action_ID)"];
+    if (functionName) {
+      acc[functionName] = (acc[functionName] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Project Plan</h1>
-        <p className="text-gray-400 mt-2">
-          Action items requiring attention (score below 4)
-        </p>
+    <div className="p-6 space-y-8">
+      {/* En-tête avec les métriques */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          title="Total des Actions"
+          value={totalTasks}
+          description="Nombre total d'actions à réaliser"
+        />
+        {Object.entries(tasksByFunction).map(([func, count]) => (
+          <MetricCard
+            key={func}
+            title={`Actions ${func}`}
+            value={count}
+            description={`Nombre d'actions pour ${func}`}
+          />
+        ))}
       </div>
-      <ProjectPlanView items={projectItems} />
+
+      {/* Vue principale */}
+      <Tabs defaultValue="priority" className="w-full">
+        <TabsList>
+          <TabsTrigger value="priority">Vue Priorités</TabsTrigger>
+        </TabsList>
+        <TabsContent value="priority">
+          <PriorityView tasks={projectItems} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
