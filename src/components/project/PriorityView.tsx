@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { api } from '../../api/airtable';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
+import { TimeEntryModal } from './TimeEntryModal';
 
 interface ActionItem {
   id: string;
@@ -9,10 +10,13 @@ interface ActionItem {
   status: string;
   itemName: string;
   functionName: string;
+  progress: number;
+  estimatedHours: number;
+  actualHours: number;
 }
 
 // Mapping entre l'affichage UI et les valeurs Airtable
-const STATUS_OPTIONS = {
+const STATUS_MAP = {
   'Non Démarré': 'Not Started',
   'En Cours': 'In Progress',
   'Terminé': 'Completed'
@@ -44,29 +48,94 @@ interface GroupedActions {
 const PriorityView: React.FC = () => {
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isImmediateOpen, setIsImmediateOpen] = useState(true);
-  const [isNextOpen, setIsNextOpen] = useState(true);
-  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState<string | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
-  const [expandedFunctions, setExpandedFunctions] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['immediateActions', 'nextActions']));
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState<string | null>(null);
+  
+  // États pour le modal de saisie du temps
+  const [timeModalOpen, setTimeModalOpen] = useState(false);
+  const [timeModalType, setTimeModalType] = useState<'estimate' | 'actual'>('estimate');
+  const [selectedAction, setSelectedAction] = useState<{id: string, status: string, name: string} | null>(null);
+
+  const loadActions = async () => {
+    try {
+      setLoading(true);
+      const items = await api.fetchPriorityItems();
+      setActions(items);
+    } catch (error) {
+      console.error('Error loading actions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadActions = async () => {
-      try {
-        setLoading(true);
-        const data = await api.fetchPriorityItems();
-        setActions(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Une erreur est survenue');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadActions();
   }, []);
+
+  const handleStatusUpdate = async (actionId: string, newStatus: string) => {
+    try {
+      const action = actions.find(a => a.id === actionId);
+      if (!action) return;
+
+      console.log('Updating status to:', newStatus);
+      
+      if (newStatus === 'En Cours') {
+        setSelectedAction({id: actionId, status: newStatus, name: action.action});
+        setTimeModalType('estimate');
+        setTimeModalOpen(true);
+      } else if (newStatus === 'Terminé') {
+        setSelectedAction({id: actionId, status: newStatus, name: action.action});
+        setTimeModalType('actual');
+        setTimeModalOpen(true);
+      } else {
+        await updateActionWithTime(actionId, newStatus);
+      }
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    }
+  };
+
+  const updateActionWithTime = async (actionId: string, status: string, hours?: number) => {
+    try {
+      setUpdatingStatus(actionId);
+      console.log('Updating action:', { actionId, status, hours });
+      
+      const mappedStatus = STATUS_MAP[status as keyof typeof STATUS_MAP];
+      console.log('Mapped status:', mappedStatus);
+      
+      await api.updateActionStatus(actionId, mappedStatus, hours);
+      
+      setActions(prevActions => 
+        prevActions.map(action => 
+          action.id === actionId 
+            ? {
+                ...action,
+                status: mappedStatus,
+                progress: status === 'En Cours' ? 50 : status === 'Terminé' ? 100 : 0,
+                estimatedHours: status === 'En Cours' && hours ? hours : action.estimatedHours,
+                actualHours: status === 'Terminé' && hours ? hours : action.actualHours
+              }
+            : action
+        )
+      );
+      
+      setIsStatusMenuOpen(null);
+      setTimeModalOpen(false);
+    } catch (error) {
+      console.error('Error in updateActionWithTime:', error);
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const handleTimeSubmit = async (hours: number) => {
+    if (selectedAction) {
+      await updateActionWithTime(selectedAction.id, selectedAction.status, hours);
+      setSelectedAction(null);
+    }
+  };
 
   const immediateActions = useMemo(() => {
     const filteredActions = actions.filter(action => action.actionWeek === 'S1-2');
@@ -102,13 +171,13 @@ const PriorityView: React.FC = () => {
     return grouped;
   }, [actions]);
 
-  const toggleFunction = (functionName: string) => {
-    setExpandedFunctions(prev => {
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => {
       const next = new Set(prev);
-      if (next.has(functionName)) {
-        next.delete(functionName);
+      if (next.has(section)) {
+        next.delete(section);
       } else {
-        next.add(functionName);
+        next.add(section);
       }
       return next;
     });
@@ -124,21 +193,6 @@ const PriorityView: React.FC = () => {
       }
       return next;
     });
-  };
-
-  const handleStatusUpdate = async (actionId: string, newStatus: string) => {
-    try {
-      setUpdatingStatus(actionId);
-      // On envoie directement la valeur Airtable
-      console.log('Updating status to:', newStatus);
-      await api.updateActionStatus(actionId, STATUS_OPTIONS[newStatus as keyof typeof STATUS_OPTIONS]);
-      await loadActions();
-      setIsStatusMenuOpen(null);
-    } catch (error) {
-      console.error('Failed to update status:', error);
-    } finally {
-      setUpdatingStatus(null);
-    }
   };
 
   if (loading) {
@@ -175,7 +229,7 @@ const PriorityView: React.FC = () => {
       <div className={HEADER_CLASSES + " rounded-lg overflow-hidden mb-4"}>
         <button
           className="w-full p-4 flex justify-between items-center hover:bg-purple-600/20 transition-all duration-200"
-          onClick={() => setIsImmediateOpen(!isImmediateOpen)}
+          onClick={() => toggleSection('immediateActions')}
         >
           <div className="flex items-center">
             <h2 className="text-xl font-bold text-gray-200">Actions Immédiates (S1-S2)</h2>
@@ -185,20 +239,20 @@ const PriorityView: React.FC = () => {
               } tâches
             </span>
           </div>
-          {isImmediateOpen ? (
+          {expandedSections.has('immediateActions') ? (
             <ChevronUpIcon className="h-6 w-6 text-gray-400" />
           ) : (
             <ChevronDownIcon className="h-6 w-6 text-gray-400" />
           )}
         </button>
         
-        {isImmediateOpen && (
+        {expandedSections.has('immediateActions') && (
           <div className="p-4 space-y-4">
             {Object.entries(immediateActions).length > 0 ? (
               Object.entries(immediateActions).map(([functionName, items]) => (
                 <div key={functionName} className="space-y-2">
                   <button
-                    onClick={() => toggleFunction(functionName)}
+                    onClick={() => toggleItem(functionName)}
                     className="w-full p-3 bg-gray-800/70 rounded-lg flex justify-between items-center hover:bg-gray-700/80 transition-all duration-200"
                   >
                     <div className="flex items-center">
@@ -207,14 +261,14 @@ const PriorityView: React.FC = () => {
                         {Object.values(items).reduce((sum, actions) => sum + actions.length, 0)} actions
                       </span>
                     </div>
-                    {expandedFunctions.has(functionName) ? (
+                    {expandedItems.has(functionName) ? (
                       <ChevronUpIcon className="h-5 w-5 text-gray-400" />
                     ) : (
                       <ChevronDownIcon className="h-5 w-5 text-gray-400" />
                     )}
                   </button>
 
-                  {expandedFunctions.has(functionName) && (
+                  {expandedItems.has(functionName) && (
                     <div className="pl-4 space-y-2">
                       {Object.entries(items).map(([itemName, actions]) => (
                         <div key={itemName} className="space-y-2">
@@ -296,7 +350,7 @@ const PriorityView: React.FC = () => {
       <div className={HEADER_CLASSES + " rounded-lg overflow-hidden"}>
         <button
           className="w-full p-4 flex justify-between items-center hover:bg-purple-600/20 transition-all duration-200"
-          onClick={() => setIsNextOpen(!isNextOpen)}
+          onClick={() => toggleSection('nextActions')}
         >
           <div className="flex items-center">
             <h2 className="text-xl font-bold text-gray-200">Next Actions (S3-S4)</h2>
@@ -306,20 +360,20 @@ const PriorityView: React.FC = () => {
               } tâches
             </span>
           </div>
-          {isNextOpen ? (
+          {expandedSections.has('nextActions') ? (
             <ChevronUpIcon className="h-6 w-6 text-gray-400" />
           ) : (
             <ChevronDownIcon className="h-6 w-6 text-gray-400" />
           )}
         </button>
         
-        {isNextOpen && (
+        {expandedSections.has('nextActions') && (
           <div className="p-4 space-y-4">
             {Object.entries(nextActions).length > 0 ? (
               Object.entries(nextActions).map(([functionName, items]) => (
                 <div key={functionName} className="space-y-2">
                   <button
-                    onClick={() => toggleFunction(functionName)}
+                    onClick={() => toggleItem(functionName)}
                     className="w-full p-3 bg-gray-800/70 rounded-lg flex justify-between items-center hover:bg-gray-700/80 transition-all duration-200"
                   >
                     <div className="flex items-center">
@@ -328,14 +382,14 @@ const PriorityView: React.FC = () => {
                         {Object.values(items).reduce((sum, actions) => sum + actions.length, 0)} actions
                       </span>
                     </div>
-                    {expandedFunctions.has(functionName) ? (
+                    {expandedItems.has(functionName) ? (
                       <ChevronUpIcon className="h-5 w-5 text-gray-400" />
                     ) : (
                       <ChevronDownIcon className="h-5 w-5 text-gray-400" />
                     )}
                   </button>
 
-                  {expandedFunctions.has(functionName) && (
+                  {expandedItems.has(functionName) && (
                     <div className="pl-4 space-y-2">
                       {Object.entries(items).map(([itemName, actions]) => (
                         <div key={itemName} className="space-y-2">
@@ -412,6 +466,23 @@ const PriorityView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de saisie du temps */}
+      <TimeEntryModal
+        isOpen={timeModalOpen}
+        onClose={() => {
+          setTimeModalOpen(false);
+          setSelectedAction(null);
+        }}
+        onSubmit={handleTimeSubmit}
+        type={timeModalType}
+        initialValue={
+          timeModalType === 'actual' && selectedAction
+            ? actions.find(a => a.id === selectedAction.id)?.estimatedHours
+            : undefined
+        }
+        actionName={selectedAction?.name || ''}
+      />
     </div>
   );
 };

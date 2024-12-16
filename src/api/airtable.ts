@@ -40,6 +40,9 @@ interface ActionItem {
   status: string;
   itemName: string;
   functionName: string;
+  progress: number;
+  estimatedHours: number;
+  actualHours: number;
 }
 
 const mapRecord = (record: Record<string, any>): PriorityItem => {
@@ -619,18 +622,30 @@ export const api = {
         const response = await axios.get(`${baseUrl}/Actions_Priority`, { 
           headers,
           params: {
-            fields: ['Action_Required', 'Action_Week', 'Status_Actions_App', 'Item_Name', 'Fonction_Name'],
+            fields: [
+              'Action_Required',
+              'Action_Week',
+              'Status_Actions_App',
+              'Item_Name',
+              'Fonction_Name',
+              'Progress',
+              'Estimated_Hours',
+              'Actual_Hours'
+            ],
             filterByFormula: "NOT({Action_Week} = '')",
             offset: offset,
           },
         });
 
+        // Log the complete first record to see all available fields
+        if (response.data.records.length > 0 && !offset) {
+          console.log('Complete first record:', JSON.stringify(response.data.records[0], null, 2));
+          console.log('All available fields:', Object.keys(response.data.records[0].fields).join(', '));
+        }
+
         allRecords = [...allRecords, ...response.data.records];
         offset = response.data.offset;
       } while (offset);
-
-      console.log('Total records from Airtable:', allRecords.length);
-      console.log('Sample record from Airtable:', JSON.stringify(allRecords[0], null, 2));
 
       const mappedRecords = allRecords
         .map((record: any) => {
@@ -640,28 +655,37 @@ export const api = {
           const itemName = Array.isArray(record.fields.Item_Name) ? record.fields.Item_Name[0] : record.fields.Item_Name || '';
           const functionName = Array.isArray(record.fields.Fonction_Name) ? record.fields.Fonction_Name[0] : record.fields.Fonction_Name || '';
           
+          // Log raw field values for debugging
+          const rawFields = {
+            Progress: record.fields.Progress,
+            progress: record.fields.progress,
+            Estimated_Hours: record.fields.Estimated_Hours,
+            estimated_hours: record.fields.estimated_hours,
+            Actual_Hours: record.fields.Actual_Hours,
+            actual_hours: record.fields.actual_hours,
+          };
+          console.log(`Raw fields for record ${record.id}:`, rawFields);
+          
           return {
             id: record.id,
             action: actionText,
             actionWeek: actionWeek,
             status: record.fields.Status_Actions_App || 'Not Started',
             itemName: itemName,
-            functionName: functionName
+            functionName: functionName,
+            progress: typeof record.fields.Progress === 'number' ? record.fields.Progress : 0,
+            estimatedHours: typeof record.fields.Estimated_Hours === 'number' ? record.fields.Estimated_Hours : 0,
+            actualHours: typeof record.fields.Actual_Hours === 'number' ? record.fields.Actual_Hours : 0
           };
         })
         .filter(record => record.action && record.actionWeek);
 
-      console.log('Total mapped records:', mappedRecords.length);
-      console.log('Records by week:', 
-        mappedRecords.reduce((acc: any, curr) => {
-          acc[curr.actionWeek] = (acc[curr.actionWeek] || 0) + 1;
-          return acc;
-        }, {})
-      );
-
       return mappedRecords;
     } catch (error) {
       console.error('Error fetching priority items:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error response:', error.response?.data);
+      }
       return [];
     }
   },
@@ -689,38 +713,54 @@ export const api = {
     }
   },
 
-  async updateActionStatus(recordId: string, status: string): Promise<void> {
+  async updateActionStatus(id: string, status: string, hours?: number): Promise<void> {
     try {
-      const requestData = {
-        fields: {
-          Status_Actions_App: status
-        }
-      };
-      
-      console.log('Request data:', JSON.stringify(requestData, null, 2));
-      console.log('Request URL:', `${baseUrl}/Actions_Priority/${recordId}`);
-      console.log('Request headers:', headers);
+      console.log('Updating action with ID:', id);
+      console.log('New status:', status);
+      console.log('Hours:', hours);
 
-      const response = await axios.patch(
-        `${baseUrl}/Actions_Priority/${recordId}`,
-        requestData,
-        { 
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json'
-          }
+      const fields: Record<string, any> = {};
+      
+      // Mise à jour du statut
+      fields['Status_Actions_App'] = status;
+      
+      // Mise à jour de la progression
+      if (status === 'In Progress') {
+        fields['Progress'] = 50;
+        if (hours !== undefined) {
+          fields['Estimated_Hours'] = hours;
         }
+      } else if (status === 'Completed') {
+        fields['Progress'] = 100;
+        if (hours !== undefined) {
+          fields['Actual_Hours'] = hours;
+        }
+      } else {
+        fields['Progress'] = 0;
+      }
+
+      console.log('Fields to update:', fields);
+
+      // Utilisation de la méthode update de base
+      const response = await axios.patch(
+        `${baseUrl}/Actions_Priority/${id}`,
+        { fields },
+        { headers }
       );
 
       console.log('Update response:', response.data);
-    } catch (error) {
+      return response.data;
+
+    } catch (error: any) {
       console.error('Error updating action status:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('Full error response:', error.response?.data);
-        console.error('Error status:', error.response?.status);
-        console.error('Error headers:', error.response?.headers);
+      if (error.response) {
+        console.error('Error response:', {
+          data: error.response.data,
+          status: error.response.status,
+          headers: error.response.headers
+        });
       }
-      throw new Error('Failed to update action status');
+      throw error;
     }
   },
 };
