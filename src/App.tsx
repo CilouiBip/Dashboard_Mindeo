@@ -11,6 +11,7 @@ import AuditTabs from './components/audit/AuditTabs';
 import ActionsList from './pages/ActionsList';
 import ImpactSimulator from './pages/ImpactSimulator';
 import ProjectPlan from './pages/ProjectPlan';
+import ProjectPlanBeta from './pages/ProjectPlanBeta';
 import { api } from './api/airtable';
 import { AuditItem } from './types/airtable';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -78,6 +79,7 @@ function App() {
                   <Route path="/audit" element={<AuditTabs auditItems={auditItems} onUpdate={refreshData} />} />
                   <Route path="/actions" element={<ActionsList />} />
                   <Route path="/project-plan" element={<ProjectPlan />} />
+                  <Route path="/project-plan-beta" element={<ProjectPlanBeta />} />
                   <Route path="/simulator" element={<ImpactSimulator />} />
                   <Route path="/admin" element={<AdminPage />} />
                 </Routes>

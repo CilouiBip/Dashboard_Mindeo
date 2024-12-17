@@ -1,13 +1,11 @@
-import React, { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { StatusSelect } from '../components/project/StatusSelect';
 import { fetchActions, updateActionStatus } from '../api/actionsBeta';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { Card } from '../components/ui/card';
-import { Input } from '../components/ui/input';
-import { StatusSelect } from '../components/project/StatusSelect';
-import { ActionItem, ActionStatus } from '../types/projectBeta';
+import { ActionStatus } from '../types/project';
 
-// Types
 interface MetricCardProps {
   title: string;
   value: string | number;
@@ -22,77 +20,72 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, description }) =>
   </Card>
 );
 
-const ProjectPlan = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const { data: actions, isLoading, refetch } = useQuery({
+export default function ProjectPlanBeta() {
+  const queryClient = useQueryClient();
+  const { data: actions, isLoading } = useQuery({
     queryKey: ['actions'],
     queryFn: fetchActions
   });
 
-  const filteredActions = useMemo(() => {
-    if (!actions) return [];
-    
-    return actions.filter(action => {
-      const matchesSearch = action.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          action.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          action.functionName.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      return matchesSearch;
-    });
-  }, [actions, searchQuery]);
-
-  const estimatedHours = useMemo(() => {
-    if (!filteredActions.length) return 0;
-    return filteredActions.reduce((sum, action) => sum + action.estimatedHours, 0);
-  }, [filteredActions]);
-
-  const actualHours = useMemo(() => {
-    if (!filteredActions.length) return 0;
-    return filteredActions.reduce((sum, action) => sum + action.actualHours, 0);
-  }, [filteredActions]);
-
-  const updateStatus = async (actionId: string, newStatus: ActionStatus) => {
-    try {
-      await updateActionStatus(actionId, newStatus);
-      await refetch();
-    } catch (error) {
-      console.error('Failed to update status:', error);
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string, status: string }) => 
+      updateActionStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['actions'] });
     }
+  });
+
+  const handleStatusChange = (id: string, status: string) => {
+    updateStatusMutation.mutate({ id, status });
   };
 
+  const metrics = useMemo(() => {
+    if (!actions?.length) return null;
+
+    const totalActions = actions.length;
+    const completedActions = actions.filter(a => a.status === ActionStatus.COMPLETED).length;
+    const completionRate = ((completedActions / totalActions) * 100).toFixed(1);
+
+    const estimatedHours = actions.reduce((sum, action) => sum + (action.estimatedHours || 0), 0);
+    const actualHours = actions.reduce((sum, action) => sum + (action.actualHours || 0), 0);
+    const variance = actualHours - estimatedHours;
+
+    return {
+      completionRate,
+      totalActions,
+      completedActions,
+      estimatedHours,
+      actualHours,
+      variance
+    };
+  }, [actions]);
+
   if (isLoading) return <LoadingSpinner />;
-  if (!actions) return null;
+  if (!actions || !metrics) return null;
 
   return (
     <div className="p-6 space-y-8">
       <h1 className="text-2xl font-bold text-white">Project Plan (Beta)</h1>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <MetricCard 
+          title="Taux de Complétion"
+          value={`${metrics.completionRate}%`}
+          description={`${metrics.completedActions} actions sur ${metrics.totalActions}`}
+        />
         <MetricCard 
           title="Heures Estimées"
-          value={estimatedHours}
+          value={metrics.estimatedHours}
           description="Total des heures estimées"
         />
         <MetricCard 
           title="Heures Réelles"
-          value={actualHours}
-          description={`Variance: ${actualHours - estimatedHours > 0 ? '+' : ''}${actualHours - estimatedHours}`}
+          value={metrics.actualHours}
+          description={`Variance: ${metrics.variance > 0 ? '+' : ''}${metrics.variance}`}
         />
       </div>
-
-      {/* Filters */}
-      <div className="flex gap-4">
-        <Input
-          placeholder="Rechercher..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
-
-      {/* Actions Table */}
+      
       <div className="bg-[#141517] rounded-lg border border-[#2D2E3A] overflow-hidden">
         <table className="w-full">
           <thead className="bg-[#1A1B1E]">
@@ -106,17 +99,18 @@ const ProjectPlan = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#2D2E3A]">
-            {filteredActions.map((action) => (
+            {actions.map((action) => (
               <tr key={action.id} className="hover:bg-[#1A1B1E]">
                 <td className="px-4 py-3 text-sm text-white">{action.action}</td>
                 <td className="px-4 py-3 text-sm text-gray-400">{action.functionName}</td>
                 <td className="px-4 py-3">
                   <StatusSelect 
                     actionId={action.id}
-                    onStatusChange={updateStatus}
+                    currentStatus={action.status}
+                    onStatusChange={handleStatusChange}
                   />
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-400">{action.actionWeek}</td>
+                <td className="px-4 py-3 text-sm text-gray-400">{action.week}</td>
                 <td className="px-4 py-3 text-sm text-gray-400">{action.estimatedHours}</td>
                 <td className="px-4 py-3 text-sm text-gray-400">{action.actualHours}</td>
               </tr>
@@ -126,6 +120,4 @@ const ProjectPlan = () => {
       </div>
     </div>
   );
-};
-
-export default ProjectPlan;
+}

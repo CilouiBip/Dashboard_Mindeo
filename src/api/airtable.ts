@@ -161,6 +161,7 @@ export const api = {
             filterByFormula: "{KPIs_Audit} = 'To Audit '",
             sort: [
               { field: 'Fonction_Name', direction: 'asc' },
+              { field: 'Sub_ID_Order', direction: 'asc' },
               { field: 'Problems_Name', direction: 'asc' },
               { field: 'Categorie_Problems_Name', direction: 'asc' }
             ],
@@ -190,6 +191,7 @@ export const api = {
               filterByFormula: "{KPIs_Audit} = 'To Audit '",
               sort: [
                 { field: 'Fonction_Name', direction: 'asc' },
+                { field: 'Sub_ID_Order', direction: 'asc' },
                 { field: 'Problems_Name', direction: 'asc' },
                 { field: 'Categorie_Problems_Name', direction: 'asc' }
               ],
@@ -251,6 +253,7 @@ export const api = {
         params: {
           sort: [
             { field: 'Fonction_Name', direction: 'asc' },
+            { field: 'Sub_ID_Order', direction: 'asc' },
             { field: 'Problems_Name', direction: 'asc' },
             { field: 'Categorie_Problems_Name', direction: 'asc' }
           ],
@@ -268,6 +271,7 @@ export const api = {
             offset,
             sort: [
               { field: 'Fonction_Name', direction: 'asc' },
+              { field: 'Sub_ID_Order', direction: 'asc' },
               { field: 'Problems_Name', direction: 'asc' },
               { field: 'Categorie_Problems_Name', direction: 'asc' }
             ],
@@ -288,7 +292,8 @@ export const api = {
         Item_Name: sanitizeString(record.fields.Item_Name),
         Action_Required: sanitizeString(record.fields.Action_Required),
         Status: sanitizeString(record.fields.Status || 'Not Started'),
-        Criticality: sanitizeString(record.fields.Criticality || 'Low')
+        Criticality: sanitizeString(record.fields.Criticality || 'Low'),
+        Sub_ID_Order: sanitizeNumber(record.fields.Sub_ID_Order)
       }));
     } catch (error) {
       console.error('Error fetching full list:', error);

@@ -17,6 +17,7 @@ interface ActionItem {
   Action_Required: string;
   Status: string;
   Criticality: string;
+  Sub_ID_Order: number;
 }
 
 interface ItemWithActions {
@@ -137,10 +138,22 @@ const ActionsList = () => {
 
     // Add items with their actions
     const categoryNode = hierarchy[functionName].children[problemName].children[subProblemText].children[categoryName];
-    categoryNode.items = Array.from(itemsMap.entries()).map(([itemName, actions]) => ({
-      itemName,
-      actions
-    }));
+    categoryNode.items = Array.from(itemsMap.entries())
+      .map(([itemName, actions]) => ({
+        itemName,
+        actions: actions.sort((a, b) => {
+          // Trier par Sub_ID_Order si disponible
+          const orderA = a.Sub_ID_Order ?? 999999;
+          const orderB = b.Sub_ID_Order ?? 999999;
+          return orderA - orderB;
+        })
+      }))
+      .sort((a, b) => {
+        // Prendre le premier Sub_ID_Order de chaque groupe d'actions
+        const orderA = a.actions[0]?.Sub_ID_Order ?? 999999;
+        const orderB = b.actions[0]?.Sub_ID_Order ?? 999999;
+        return orderA - orderB;
+      });
   });
 
   const toggleSection = (path: string) => {

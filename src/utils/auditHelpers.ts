@@ -18,9 +18,21 @@ export const calculateMetrics = (items: AuditItem[]) => {
 export const buildAuditHierarchy = (items: AuditItem[]): Record<string, HierarchyNode> => {
   console.log('Building hierarchy from items:', items);
   
+  // Trier les items par Fonction_Name et Sub_ID_Order
+  const sortedItems = [...items].sort((a, b) => {
+    // D'abord trier par Fonction_Name
+    if (a.Fonction_Name !== b.Fonction_Name) {
+      return a.Fonction_Name.localeCompare(b.Fonction_Name);
+    }
+    // Ensuite par Sub_ID_Order (si disponible)
+    const orderA = a.Sub_ID_Order ?? 999999;
+    const orderB = b.Sub_ID_Order ?? 999999;
+    return orderA - orderB;
+  });
+  
   const hierarchy: Record<string, HierarchyNode> = {};
   
-  items.forEach(item => {
+  sortedItems.forEach(item => {
     const { Fonction_Name, Problems_Name, Sub_Problems_Text, Categorie_Problems_Name } = item;
     
     // Initialize function level

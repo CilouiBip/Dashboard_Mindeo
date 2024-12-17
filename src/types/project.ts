@@ -1,3 +1,40 @@
+export interface ActionItem {
+  id: string;
+  action: string;
+  actionWeek: string;
+  status: ActionStatus;
+  itemName: string;
+  functionName: string;
+  progress: number;
+  estimatedHours: number;
+  actualHours: number;
+}
+
+export enum ActionStatus {
+  NOT_STARTED = 'Not Started',
+  IN_PROGRESS = 'In Progress',
+  COMPLETED = 'Completed'
+}
+
+export interface ProjectMetrics {
+  completion: {
+    total: number;
+    completed: number;
+    rate: number;
+  };
+  hours: {
+    estimated: number;
+    actual: number;
+    variance: number;
+  };
+  byFunction: Record<string, {
+    total: number;
+    completed: number;
+    rate: number;
+  }>;
+}
+
+// Keeping existing types for backward compatibility
 export type TimeFrame = 
   | "Immédiat" 
   | "Autre";
