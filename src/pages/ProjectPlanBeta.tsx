@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { StatusSelect } from '../components/project/StatusSelect';
 import { fetchActions, updateActionStatus } from '../api/actionsBeta';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { Card } from '../components/ui/card';
 import { ActionStatus } from '../types/project';
+import { TimeEntryModal } from '../components/project/TimeEntryModal';
 
 interface MetricCardProps {
   title: string;
@@ -22,21 +23,73 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, description }) =>
 
 export default function ProjectPlanBeta() {
   const queryClient = useQueryClient();
+  const [timeModalState, setTimeModalState] = useState<{
+    isOpen: boolean;
+    type: 'estimate' | 'actual';
+    actionId: string;
+    actionName: string;
+    newStatus: string;
+    initialValue: number;
+  } | null>(null);
+
   const { data: actions, isLoading } = useQuery({
     queryKey: ['actions'],
     queryFn: fetchActions
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string, status: string }) => 
-      updateActionStatus(id, status),
+    mutationFn: ({ id, status, estimatedHours, actualHours }: { 
+      id: string;
+      status: string;
+      estimatedHours?: number;
+      actualHours?: number;
+    }) => updateActionStatus(id, status, estimatedHours, actualHours),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['actions'] });
     }
   });
 
   const handleStatusChange = (id: string, status: string) => {
-    updateStatusMutation.mutate({ id, status });
+    const action = actions?.find(a => a.id === id);
+    if (!action) return;
+
+    if (status === ActionStatus.COMPLETED) {
+      // When marking as completed, ask for actual hours
+      setTimeModalState({
+        isOpen: true,
+        type: 'actual',
+        actionId: id,
+        actionName: action.action,
+        newStatus: status,
+        initialValue: action.actualHours
+      });
+    } else if (status === ActionStatus.IN_PROGRESS && !action.estimatedHours) {
+      // When starting work and no estimate exists, ask for estimated hours
+      setTimeModalState({
+        isOpen: true,
+        type: 'estimate',
+        actionId: id,
+        actionName: action.action,
+        newStatus: status,
+        initialValue: 0
+      });
+    } else {
+      // For other status changes, just update the status
+      updateStatusMutation.mutate({ id, status });
+    }
+  };
+
+  const handleTimeSubmit = (hours: number) => {
+    if (!timeModalState) return;
+
+    const { actionId, newStatus, type } = timeModalState;
+    updateStatusMutation.mutate({
+      id: actionId,
+      status: newStatus,
+      ...(type === 'estimate' ? { estimatedHours: hours } : { actualHours: hours })
+    });
+
+    setTimeModalState(null);
   };
 
   const metrics = useMemo(() => {
@@ -118,6 +171,17 @@ export default function ProjectPlanBeta() {
           </tbody>
         </table>
       </div>
+      
+      {timeModalState && (
+        <TimeEntryModal
+          isOpen={timeModalState.isOpen}
+          onClose={() => setTimeModalState(null)}
+          onSubmit={handleTimeSubmit}
+          type={timeModalState.type}
+          initialValue={timeModalState.initialValue}
+          actionName={timeModalState.actionName}
+        />
+      )}
     </div>
   );
 }

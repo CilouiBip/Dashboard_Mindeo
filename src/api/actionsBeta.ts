@@ -22,7 +22,8 @@ export const fetchActions = async (): Promise<ActionItem[]> => {
     const response = await axios.get(`${baseUrl}/Actions_Priority`, {
       headers,
       params: {
-        pageSize: 100
+        pageSize: 100,
+        filterByFormula: "{To_Audit} = 'To Audit '"
       }
     });
 
@@ -35,7 +36,8 @@ export const fetchActions = async (): Promise<ActionItem[]> => {
         headers,
         params: {
           offset,
-          pageSize: 100
+          pageSize: 100,
+          filterByFormula: "{To_Audit} = 'To Audit '"
         }
       });
       
@@ -78,19 +80,31 @@ const mapAirtableResponse = (records: any[]): ActionItem[] => {
   });
 };
 
-export const updateActionStatus = async (id: string, status: string): Promise<void> => {
+export const updateActionStatus = async (
+  id: string, 
+  status: string,
+  estimatedHours?: number,
+  actualHours?: number
+): Promise<void> => {
   try {
+    const fields: any = {
+      Status_Actions_Beta: status
+    };
+
+    if (estimatedHours !== undefined) {
+      fields.Estimated_Hours = estimatedHours;
+    }
+    if (actualHours !== undefined) {
+      fields.Actual_Hours = actualHours;
+    }
+
     await axios.patch(
       `${baseUrl}/Actions_Priority/${id}`,
-      {
-        fields: {
-          Status_Actions_Beta: status
-        }
-      },
+      { fields },
       { headers }
     );
   } catch (error) {
-    console.error('Error updating action status:', error);
+    console.error('Error updating action:', error);
     throw error;
   }
 };
