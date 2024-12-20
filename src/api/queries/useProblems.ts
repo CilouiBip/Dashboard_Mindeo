@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchMarketingProblems } from '../airtable';
+import { fetchMarketingProblems } from '../marketingApi';
 import { Problem } from '../../types/airtable';
 
-export const useProblems = () => {
-  return useQuery<Problem[], Error>({
+export function useProblems() {
+  return useQuery<Problem[]>({
     queryKey: ['problems'],
     queryFn: fetchMarketingProblems
   });
-};
+}

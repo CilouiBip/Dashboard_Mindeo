@@ -3,7 +3,7 @@ import { Card } from '../components/ui/Card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../api/airtable';
+import { fetchKPIs, updateKPIValue } from '../api/kpiApi';
 import { KPI } from '../types/airtable';
 import KPISimulatorCard from '../components/simulator/KPISimulatorCard';
 import FunctionHeader from '../components/simulator/FunctionHeader';
@@ -16,7 +16,7 @@ const ImpactSimulator = () => {
 
   const { data: kpis = [], isLoading, error } = useQuery<KPI[]>({
     queryKey: ['kpisBenchmark'],
-    queryFn: api.fetchKPIsBenchmark,
+    queryFn: fetchKPIs,
     onSuccess: (data) => {
       console.log('✅ KPIs loaded:', data.length);
       console.log('📊 KPIs data:', data);

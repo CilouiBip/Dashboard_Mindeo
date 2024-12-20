@@ -37,10 +37,19 @@ export default function ProjectPlanBeta() {
     'Autres Actions': true
   });
 
+  const [expandedFunctions, setExpandedFunctions] = useState<{ [key: string]: boolean }>({});
+
   const toggleGroup = (groupName: string) => {
     setExpandedGroups(prev => ({
       ...prev,
       [groupName]: !prev[groupName]
+    }));
+  };
+
+  const toggleFunction = (functionName: string) => {
+    setExpandedFunctions(prev => ({
+      ...prev,
+      [functionName]: !prev[functionName]
     }));
   };
 
@@ -128,17 +137,19 @@ export default function ProjectPlanBeta() {
   const groupedActions = useMemo(() => {
     if (!actions) return {};
     
-    const grouped: { [key: string]: typeof actions } = {
-      'Actions Immédiates': [],
-      'Autres Actions': []
+    const grouped: { [key: string]: { [key: string]: typeof actions } } = {
+      'Actions Immédiates': {},
+      'Autres Actions': {}
     };
 
     actions.forEach(action => {
-      if (action.actionWeek === 'S1-2') {
-        grouped['Actions Immédiates'].push(action);
-      } else {
-        grouped['Autres Actions'].push(action);
+      const mainGroup = action.actionWeek === 'S1-2' ? 'Actions Immédiates' : 'Autres Actions';
+      const functionName = action.functionName || 'Autre';
+      
+      if (!grouped[mainGroup][functionName]) {
+        grouped[mainGroup][functionName] = [];
       }
+      grouped[mainGroup][functionName].push(action);
     });
 
     return grouped;
@@ -170,13 +181,18 @@ export default function ProjectPlanBeta() {
         />
       </div>
       
-      {Object.entries(groupedActions).map(([groupName, groupActions]) => (
+      {Object.entries(groupedActions).map(([groupName, functionGroups]) => (
         <div key={groupName} className="space-y-4">
           <div 
             className="flex items-center cursor-pointer" 
             onClick={() => toggleGroup(groupName)}
           >
-            <h2 className="text-xl font-semibold text-white">{groupName}</h2>
+            <h2 className="text-xl font-semibold text-white flex items-center">
+              {groupName}
+              <span className="ml-2 px-2 py-1 text-sm bg-purple-900/50 rounded-full border border-purple-500">
+                {Object.values(functionGroups).reduce((sum, actions) => sum + actions.length, 0)} tâches
+              </span>
+            </h2>
             <button className="ml-2 text-gray-400 focus:outline-none">
               {expandedGroups[groupName] ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -191,37 +207,64 @@ export default function ProjectPlanBeta() {
           </div>
           
           {expandedGroups[groupName] && (
-            <div className="bg-[#141517] rounded-lg border border-[#2D2E3A] overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-[#1A1B1E]">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">ACTION</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">FONCTION</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">STATUS</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">SEMAINE</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">HEURES EST.</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">HEURES ACT.</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#2D2E3A]">
-                  {groupActions.map((action) => (
-                    <tr key={action.id} className="hover:bg-[#1A1B1E]">
-                      <td className="px-4 py-3 text-sm text-white">{action.action}</td>
-                      <td className="px-4 py-3 text-sm text-gray-400">{action.functionName}</td>
-                      <td className="px-4 py-3">
-                        <StatusSelect 
-                          actionId={action.id}
-                          currentStatus={action.status}
-                          onStatusChange={handleStatusChange}
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-400">{action.actionWeek}</td>
-                      <td className="px-4 py-3 text-sm text-gray-400">{action.estimatedHours}</td>
-                      <td className="px-4 py-3 text-sm text-gray-400">{action.actualHours}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-2">
+              {Object.entries(functionGroups).map(([functionName, functionActions]) => (
+                <div key={functionName} className="bg-[#141517] rounded-lg border border-[#2D2E3A] overflow-hidden">
+                  <div 
+                    className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-[#1A1B1E]"
+                    onClick={() => toggleFunction(functionName)}
+                  >
+                    <div className="flex items-center">
+                      <button className="mr-2 text-gray-400 focus:outline-none">
+                        {expandedFunctions[functionName] ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </button>
+                      <h3 className="font-medium text-white">{functionName}</h3>
+                      <span className="ml-2 text-sm text-gray-400">{functionActions.length} actions</span>
+                    </div>
+                  </div>
+                  
+                  {expandedFunctions[functionName] && (
+                    <div className="border-t border-[#2D2E3A]">
+                      <table className="w-full">
+                        <thead className="bg-[#1A1B1E]">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">ACTION</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">STATUS</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">SEMAINE</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">HEURES EST.</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">HEURES ACT.</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#2D2E3A]">
+                          {functionActions.map((action) => (
+                            <tr key={action.id} className="hover:bg-[#1A1B1E]">
+                              <td className="px-4 py-3 text-sm text-white">{action.action}</td>
+                              <td className="px-4 py-3">
+                                <StatusSelect 
+                                  actionId={action.id}
+                                  currentStatus={action.status}
+                                  onStatusChange={handleStatusChange}
+                                />
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-400">{action.actionWeek}</td>
+                              <td className="px-4 py-3 text-sm text-gray-400">{action.estimatedHours}</td>
+                              <td className="px-4 py-3 text-sm text-gray-400">{action.actualHours}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>
