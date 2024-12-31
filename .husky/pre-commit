@@ -1,0 +1,52 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo "${YELLOW}Running pre-commit checks...${NC}"
+
+# Check if rules file exists and hasn't been modified
+if git diff --cached --name-only | grep -q ".windsurf/rules.md"; then
+  echo "${RED}Error: .windsurf/rules.md has been modified. This file requires special approval.${NC}"
+  exit 1
+fi
+
+# Validate TypeScript
+echo "Running TypeScript validation..."
+npm run type-check || exit 1
+
+# Run ESLint
+echo "Running ESLint..."
+npm run lint || exit 1
+
+# Check commit message format
+commit_msg=$(git log -1 --pretty=%B)
+if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore)(\([a-z]+\))?: .+$"; then
+  echo "${RED}Error: Commit message does not follow convention.${NC}"
+  echo "Format: type(scope): message"
+  echo "Types: feat, fix, docs, style, refactor, test, chore"
+  exit 1
+fi
+
+# Validate data structure in modified files
+echo "Checking data structure compliance..."
+for file in $(git diff --cached --name-only); do
+  if [[ $file == *.ts ]] || [[ $file == *.tsx ]]; then
+    # Check for proper imports
+    if ! grep -q "from '@/" "$file"; then
+      echo "${RED}Error: File $file is missing absolute imports (@/).${NC}"
+      exit 1
+    fi
+    
+    # Check for proper type definitions
+    if ! grep -q "interface" "$file" && ! grep -q "type" "$file"; then
+      echo "${YELLOW}Warning: File $file might be missing type definitions.${NC}"
+    fi
+  fi
+done
+
+echo "${GREEN}All pre-commit checks passed!${NC}"

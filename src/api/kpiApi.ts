@@ -1,9 +1,53 @@
 import axios from 'axios';
-import { KPI } from '../types/airtable';
+import { KPI, validateKPI, validateKPIs } from '../schemas/airtable';
 import { baseUrl, headers, sanitizeNumber } from './utils/apiUtils';
 
+// Mock data for development and testing
+const mockKPIs = [
+  {
+    ID_KPI: 'kpi1',
+    Nom_KPI: 'Revenue Growth',
+    Type: 'Principal',
+    Valeur_Actuelle: '1000000',
+    Valeur_Cible: '1500000',
+    Fonctions: ['Sales', 'Marketing'],
+    Description: 'Annual revenue growth target',
+    Unite: '€',
+    Impact_Type: 'linear',
+    Impact_Revenue: '500000',
+    Impact_EBITDA: '100000'
+  },
+  {
+    ID_KPI: 'kpi2',
+    Nom_KPI: 'Customer Satisfaction',
+    Type: 'Secondaire',
+    Valeur_Actuelle: '85',
+    Valeur_Cible: '95',
+    Fonctions: ['Customer Service'],
+    Description: 'NPS Score',
+    Unite: '%',
+    Impact_Type: 'exponential',
+    Impact_Revenue: '250000',
+    Impact_EBITDA: '50000'
+  }
+];
+
+/**
+ * Fetches KPIs from the API or mock data
+ */
 export async function fetchKPIs(): Promise<KPI[]> {
   try {
+    // In development, use mock data
+    if (process.env.NODE_ENV === 'development') {
+      const result = validateKPIs(mockKPIs);
+      if (!result.success) {
+        console.error('Mock KPI validation failed:', result.errors);
+        return [];
+      }
+      return result.data;
+    }
+
+    // In production, fetch from Airtable
     const response = await axios.get(`${baseUrl}/KPIs`, { 
       headers,
       params: {
@@ -12,10 +56,11 @@ export async function fetchKPIs(): Promise<KPI[]> {
     });
 
     if (!response.data.records) {
-      throw new Error('No KPI data found');
+      console.error('No KPI data found');
+      return [];
     }
 
-    return response.data.records.map((record: any) => ({
+    const rawData = response.data.records.map((record: any) => ({
       ID_KPI: record.id,
       Nom_KPI: record.fields.Nom_KPI || '',
       Type: record.fields.Type || '',
@@ -25,21 +70,37 @@ export async function fetchKPIs(): Promise<KPI[]> {
       Statut: record.fields.Statut || '',
       Fonctions: record.fields.Fonctions || ''
     }));
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        throw new Error('KPIs table not found');
-      }
-      if (error.response?.status === 401) {
-        throw new Error('Invalid API key');
-      }
+
+    const result = validateKPIs(rawData);
+    
+    if (!result.success) {
+      console.error('KPI validation failed:', result.errors);
+      return [];
     }
-    throw new Error('Failed to fetch KPIs');
+    
+    return result.data;
+  } catch (error) {
+    console.error('Error fetching KPIs:', error);
+    return [];
   }
 }
 
+/**
+ * Fetches KPIs benchmark from the API or mock data
+ */
 export async function fetchKPIsBenchmark(): Promise<KPI[]> {
   try {
+    // In development, use mock data
+    if (process.env.NODE_ENV === 'development') {
+      const result = validateKPIs(mockKPIs);
+      if (!result.success) {
+        console.error('Mock KPI benchmark validation failed:', result.errors);
+        return [];
+      }
+      return result.data;
+    }
+
+    // In production, fetch from Airtable
     const response = await axios.get(`${baseUrl}/KPIs_Benchmark`, { 
       headers,
       params: {
@@ -48,10 +109,11 @@ export async function fetchKPIsBenchmark(): Promise<KPI[]> {
     });
 
     if (!response.data.records) {
-      throw new Error('No KPI benchmark data found');
+      console.error('No KPI benchmark data found');
+      return [];
     }
 
-    return response.data.records.map((record: any) => ({
+    const rawData = response.data.records.map((record: any) => ({
       ID_KPI: record.id,
       Nom_KPI: record.fields.Nom_KPI || '',
       Type: record.fields.Type || '',
@@ -61,55 +123,157 @@ export async function fetchKPIsBenchmark(): Promise<KPI[]> {
       Statut: record.fields.Statut || '',
       Fonctions: record.fields.Fonctions || ''
     }));
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        throw new Error('KPIs benchmark table not found');
-      }
-      if (error.response?.status === 401) {
-        throw new Error('Invalid API key');
-      }
+
+    const result = validateKPIs(rawData);
+    
+    if (!result.success) {
+      console.error('KPI benchmark validation failed:', result.errors);
+      return [];
     }
-    throw new Error('Failed to fetch KPI benchmarks');
+    
+    return result.data;
+  } catch (error) {
+    console.error('Error fetching KPI benchmarks:', error);
+    return [];
   }
 }
 
+/**
+ * Fetches a KPI by ID from the API or mock data
+ */
 export async function getKPIById(kpiId: string): Promise<KPI | null> {
   try {
+    // In development, use mock data
+    if (process.env.NODE_ENV === 'development') {
+      const mockKPI = mockKPIs.find(kpi => kpi.ID_KPI === kpiId);
+      if (!mockKPI) {
+        console.error('Mock KPI not found');
+        return null;
+      }
+
+      const result = validateKPI(mockKPI);
+      if (!result.success) {
+        console.error('Mock KPI validation failed:', result.errors);
+        return null;
+      }
+      return result.data;
+    }
+
+    // In production, fetch from Airtable
     const response = await axios.get(`${baseUrl}/KPIs/${kpiId}`, { headers });
-    return response.data;
-  } catch {
+    if (!response.data) {
+      console.error('KPI not found');
+      return null;
+    }
+
+    const rawData = {
+      ID_KPI: response.data.id,
+      Nom_KPI: response.data.fields.Nom_KPI || '',
+      Type: response.data.fields.Type || '',
+      Valeur_Actuelle: sanitizeNumber(response.data.fields.Valeur_Actuelle),
+      Valeur_Precedente: sanitizeNumber(response.data.fields.Valeur_Precedente),
+      Score_KPI_Final: sanitizeNumber(response.data.fields.Score_KPI_Final),
+      Statut: response.data.fields.Statut || '',
+      Fonctions: response.data.fields.Fonctions || ''
+    };
+
+    const result = validateKPI(rawData);
+    
+    if (!result.success) {
+      console.error('KPI validation failed:', result.errors);
+      return null;
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error('Error fetching KPI:', error);
     return null;
   }
 }
 
-export async function updateKPIValue(kpiId: string, newValue: number): Promise<void> {
+/**
+ * Updates a KPI value
+ */
+export async function updateKPIValue(data: { ID_KPI: string; Valeur_Actuelle: number }): Promise<KPI | null> {
   try {
-    await axios.patch(
-      `${baseUrl}/KPIs/${kpiId}`,
+    // In development, return mock updated data
+    if (process.env.NODE_ENV === 'development') {
+      const mockUpdated = {
+        ...mockKPIs.find(kpi => kpi.ID_KPI === data.ID_KPI)!,
+        Valeur_Actuelle: data.Valeur_Actuelle.toString()
+      };
+      
+      const result = validateKPI(mockUpdated);
+      if (!result.success) {
+        console.error('Mock KPI update validation failed:', result.errors);
+        return null;
+      }
+      return result.data;
+    }
+
+    // In production, update via API
+    const response = await axios.patch(
+      `${baseUrl}/KPIs/${data.ID_KPI}`,
       {
         fields: {
-          Valeur_Actuelle: newValue
+          Valeur_Actuelle: data.Valeur_Actuelle
         }
       },
       { headers }
     );
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        throw new Error('KPI not found');
-      }
-      if (error.response?.status === 401) {
-        throw new Error('Invalid API key');
-      }
+
+    if (!response.data) {
+      console.error('KPI not found');
+      return null;
     }
-    throw new Error('Failed to update KPI value');
+
+    const rawData = {
+      ID_KPI: response.data.id,
+      Nom_KPI: response.data.fields.Nom_KPI || '',
+      Type: response.data.fields.Type || '',
+      Valeur_Actuelle: sanitizeNumber(response.data.fields.Valeur_Actuelle),
+      Valeur_Precedente: sanitizeNumber(response.data.fields.Valeur_Precedente),
+      Score_KPI_Final: sanitizeNumber(response.data.fields.Score_KPI_Final),
+      Statut: response.data.fields.Statut || '',
+      Fonctions: response.data.fields.Fonctions || ''
+    };
+
+    const result = validateKPI(rawData);
+    
+    if (!result.success) {
+      console.error('Updated KPI validation failed:', result.errors);
+      return null;
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error('Error updating KPI:', error);
+    return null;
   }
 }
 
-export async function updateKPIValueLegacy(id: string, value: number): Promise<void> {
+/**
+ * Updates a KPI value (Legacy)
+ */
+export async function updateKPIValueLegacy(id: string, value: number): Promise<KPI | null> {
   try {
-    await axios.patch(
+    // In development, return mock updated data
+    if (process.env.NODE_ENV === 'development') {
+      const mockUpdated = {
+        ...mockKPIs.find(kpi => kpi.ID_KPI === id)!,
+        Valeur_Precedente: value.toString()
+      };
+      
+      const result = validateKPI(mockUpdated);
+      if (!result.success) {
+        console.error('Mock KPI update validation failed:', result.errors);
+        return null;
+      }
+      return result.data;
+    }
+
+    // In production, update via API
+    const response = await axios.patch(
       `${baseUrl}/KPIs/${id}`,
       {
         fields: {
@@ -118,15 +282,33 @@ export async function updateKPIValueLegacy(id: string, value: number): Promise<v
       },
       { headers }
     );
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        throw new Error('KPI not found');
-      }
-      if (error.response?.status === 401) {
-        throw new Error('Invalid API key');
-      }
+
+    if (!response.data) {
+      console.error('KPI not found');
+      return null;
     }
-    throw new Error('Failed to update legacy KPI value');
+
+    const rawData = {
+      ID_KPI: response.data.id,
+      Nom_KPI: response.data.fields.Nom_KPI || '',
+      Type: response.data.fields.Type || '',
+      Valeur_Actuelle: sanitizeNumber(response.data.fields.Valeur_Actuelle),
+      Valeur_Precedente: sanitizeNumber(response.data.fields.Valeur_Precedente),
+      Score_KPI_Final: sanitizeNumber(response.data.fields.Score_KPI_Final),
+      Statut: response.data.fields.Statut || '',
+      Fonctions: response.data.fields.Fonctions || ''
+    };
+
+    const result = validateKPI(rawData);
+    
+    if (!result.success) {
+      console.error('Updated KPI validation failed:', result.errors);
+      return null;
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error('Error updating legacy KPI:', error);
+    return null;
   }
 }

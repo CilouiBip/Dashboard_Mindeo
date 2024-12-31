@@ -1,12 +1,26 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchKPIs } from '../api/airtable';
+import { fetchKPIs } from '../api/kpiApi';
 import { useDebugMode } from './useDebugMode';
 import { calculateFunctionScores } from '../utils/calculations';
+import { KPI } from '../types/airtable';
 
-export const useKPIData = () => {
+export interface KPIQueryOptions {
+  enabled?: boolean;
+  staleTime?: number;
+  refetchInterval?: number;
+  refetchOnWindowFocus?: boolean;
+}
+
+export const useKPIData = (options: KPIQueryOptions = {}) => {
   const { isDebugMode } = useDebugMode();
+  const {
+    enabled = true,
+    staleTime = 30 * 1000,
+    refetchInterval = 30 * 1000,
+    refetchOnWindowFocus = true,
+  } = options;
 
-  return useQuery({
+  return useQuery<KPI[], Error>({
     queryKey: ['kpis'],
     queryFn: fetchKPIs,
     select: (data) => {
@@ -21,8 +35,9 @@ export const useKPIData = () => {
       
       return scores;
     },
-    staleTime: 30 * 1000,
-    refetchInterval: 30 * 1000,
-    refetchOnWindowFocus: true,
+    enabled,
+    staleTime,
+    refetchInterval,
+    refetchOnWindowFocus,
   });
 };
