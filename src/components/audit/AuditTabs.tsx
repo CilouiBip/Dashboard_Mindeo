@@ -1,68 +1,36 @@
-import React, { useState } from 'react';
-import { AuditItem } from '../../types/airtable';
+import React from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../api/airtable';
 import NewAuditView from './NewAuditView';
 import ScorecardView from './ScorecardView';
+import LoadingSpinner from '../common/LoadingSpinner';
+import ErrorMessage from '../common/ErrorMessage';
 
-interface AuditTabsProps {
-  auditItems: AuditItem[];
-  onUpdate: () => Promise<void>;
-}
+export default function AuditTabs() {
+  const { data: auditItems, isLoading, error } = useQuery({
+    queryKey: ['auditItems'],
+    queryFn: api.fetchAuditItems,
+  });
 
-type TabType = 'scorecard' | 'content' | 'marketing' | 'sales';
-
-const AuditTabs: React.FC<AuditTabsProps> = ({ auditItems, onUpdate }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('scorecard');
-
-  const tabs: { id: TabType; label: string }[] = [
-    { id: 'scorecard', label: 'Scorecard' },
-    { id: 'content', label: 'Content' },
-    { id: 'marketing', label: 'Marketing' },
-    { id: 'sales', label: 'Sales' },
-  ];
-
-  const filteredItems = (functionName?: string) => {
-    if (!functionName) return auditItems;
-    return auditItems.filter(item => item.Fonction_Name === functionName);
-  };
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error as Error} />;
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="space-x-2 mb-6 px-6 pt-6">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`
-              px-4 py-2 
-              rounded-lg
-              transition-colors
-              ${activeTab === tab.id 
-                ? 'bg-violet-500/10 text-violet-400' 
-                : 'text-gray-400 hover:text-gray-300'
-              }
-            `}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex-1 overflow-auto">
-        {activeTab === 'scorecard' && (
-          <ScorecardView auditItems={auditItems} />
-        )}
-        {activeTab === 'content' && (
-          <NewAuditView auditItems={filteredItems('Content')} onUpdate={onUpdate} />
-        )}
-        {activeTab === 'marketing' && (
-          <NewAuditView auditItems={filteredItems('Marketing')} onUpdate={onUpdate} />
-        )}
-        {activeTab === 'sales' && (
-          <NewAuditView auditItems={filteredItems('Sales')} onUpdate={onUpdate} />
-        )}
-      </div>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4 text-white">Audit</h1>
+      <Tabs defaultValue="overview">
+        <TabsList>
+          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="details">Détails</TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview">
+          <NewAuditView auditItems={auditItems || []} />
+        </TabsContent>
+        <TabsContent value="details">
+          <NewAuditView auditItems={auditItems || []} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
-};
-
-export default AuditTabs;
+}

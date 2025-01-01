@@ -56,7 +56,7 @@ export default defineConfig({
     dedupe: ['react', 'react-dom', 'recharts']
   },
   server: {
-    port: 3000,
+    port: 5176,
     strictPort: true
   },
   test: {

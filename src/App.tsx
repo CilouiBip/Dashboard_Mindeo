@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
@@ -12,85 +12,53 @@ import AuditTabs from './components/audit/AuditTabs';
 import ActionsList from './pages/ActionsList';
 import ImpactSimulator from './pages/ImpactSimulator';
 import ProjectPlanBeta from './pages/ProjectPlanBeta';
-import { api } from './api/airtable';
-import { AuditItem } from './types/airtable';
+// import { api } from './api/airtable';
+// import { AuditItem } from './types/airtable';
 import ErrorBoundary from './components/ErrorBoundary';
 import { UIConfigProvider } from './contexts/UIConfigContext';
 import AdminPage from './pages/Admin';
+import VisionPage from './pages/VisionPage';
+import OKRPage from './pages/OKRPage';
+import ProjectPlanPage from './pages/ProjectPlanPage';
+import MemoryPage from './pages/MemoryPage';
+import ProjectPlanOKRPage from './pages/ProjectPlanOKRPage';
+import Layout from './components/layout/Layout';
 
 function App() {
-  const [auditItems, setAuditItems] = useState<AuditItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const items = await api.fetchAuditItems();
-      setAuditItems(items);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const refreshData = async () => {
-    try {
-      const items = await api.fetchAuditItems();
-      setAuditItems(items);
-    } catch (err) {
-      console.error('Failed to refresh data:', err);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-violet-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-        <div className="text-red-500">Error: {error}</div>
-      </div>
-    );
-  }
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <UIConfigProvider>
-          <Router>
-            <div className="min-h-screen bg-[#14151A]">
-              <Header />
-              <Navigation />
-              <main className="container mx-auto px-4">
-                <ErrorBoundary>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <UIConfigProvider>
+            <Router>
+              <div className="min-h-screen bg-[#14151A]">
+                <Header />
+                <Navigation />
+                <main className="container mx-auto px-4">
                   <Routes>
-                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/kpis" element={<KPIsMVD />} />
-                    <Route path="/audit" element={<AuditTabs auditItems={auditItems} onUpdate={refreshData} />} />
+                    <Route path="/audit" element={<AuditTabs />} />
                     <Route path="/actions" element={<ActionsList />} />
-                    <Route path="/project-plan" element={<ProjectPlanBeta />} />
-                    <Route path="/simulator" element={<ImpactSimulator />} />
+                    <Route path="/impact-simulator" element={<ImpactSimulator />} />
+                    <Route path="/project-plan" element={<ProjectPlanPage />} />
+                    <Route path="/project-plan-beta" element={<ProjectPlanBeta />} />
                     <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/okr-tools/vision" element={<VisionPage />} />
+                    <Route path="/okr-tools/okr" element={<OKRPage />} />
+                    <Route path="/okr-tools/project-plan" element={<ProjectPlanPage />} />
+                    <Route path="/memory" element={<MemoryPage />} />
+                    <Route path="/project-plan-okr" element={<ProjectPlanOKRPage />} />
                   </Routes>
-                </ErrorBoundary>
-              </main>
-            </div>
-          </Router>
-        </UIConfigProvider>
-      </TooltipProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+                </main>
+              </div>
+            </Router>
+          </UIConfigProvider>
+        </TooltipProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
