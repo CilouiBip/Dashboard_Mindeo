@@ -28,7 +28,7 @@ export async function create(vision: Vision) {
         vision_text: vision.vision_text,
         current_revenue: vision.current_revenue,
         target_revenue: vision.target_revenue,
-        main_produc/Users/mehdi/Documents/Screenshot 2024-12-31 at 21.40.10.pngt: vision.main_product,
+        main_product: vision.main_product,
         main_challenges: vision.main_challenges || null,
         context: vision.context || null,
       }
@@ -60,7 +60,7 @@ export async function update(id: string, updates: Partial<Vision>) {
   return { data, error };
 }
 
-
+export async function remove(id: string) {
   // D'abord, supprimons les OKRs associés
   const { error: okrError } = await supabase
     .from('okr')
@@ -68,20 +68,14 @@ export async function update(id: string, updates: Partial<Vision>) {
     .eq('vision_id', id);
 
   if (okrError) {
-    console.error('Error deleting associated OKRs:', okrError);
     return { error: okrError };
   }
 
   // Ensuite, supprimons la vision
-  const { error: visionError } = await supabase
+  const { data, error } = await supabase
     .from('vision')
     .delete()
     .eq('id', id);
 
-  if (visionError) {
-    console.error('Error deleting vision:', visionError);
-    return { error: visionError };
-  }
-
-  return { error: null };
+  return { data, error };
 }

@@ -11,7 +11,9 @@ import {
   ChevronDown,
   Eye,
   Brain,
-  BookOpen
+  BookOpen,
+  Map,
+  Users
 } from 'lucide-react';
 
 const Navigation = () => {
@@ -108,12 +110,12 @@ const Navigation = () => {
               </Link>
 
               <Link 
-                to="/okr-tools/project-plan" 
-                className={`${getNavItemClass('/okr-tools/project-plan')} block`}
+                to="/okr-tools/roadmap" 
+                className={`${getNavItemClass('/okr-tools/roadmap')} block`}
                 onClick={() => setIsOKRMenuOpen(false)}
               >
-                <Kanban className="h-5 w-5" />
-                <span className="font-medium">Project Plan OKR</span>
+                <Map className="h-5 w-5" />
+                <span className="font-medium">Roadmap</span>
               </Link>
 
               <Link 

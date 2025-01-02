@@ -12,8 +12,6 @@ import AuditTabs from './components/audit/AuditTabs';
 import ActionsList from './pages/ActionsList';
 import ImpactSimulator from './pages/ImpactSimulator';
 import ProjectPlanBeta from './pages/ProjectPlanBeta';
-// import { api } from './api/airtable';
-// import { AuditItem } from './types/airtable';
 import ErrorBoundary from './components/ErrorBoundary';
 import { UIConfigProvider } from './contexts/UIConfigContext';
 import AdminPage from './pages/Admin';
@@ -21,7 +19,7 @@ import VisionPage from './pages/VisionPage';
 import OKRPage from './pages/OKRPage';
 import ProjectPlanPage from './pages/ProjectPlanPage';
 import MemoryPage from './pages/MemoryPage';
-import ProjectPlanOKRPage from './pages/ProjectPlanOKRPage';
+import RoadmapPage from './pages/RoadmapPage';
 import Layout from './components/layout/Layout';
 
 function App() {
@@ -47,9 +45,8 @@ function App() {
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/okr-tools/vision" element={<VisionPage />} />
                     <Route path="/okr-tools/okr" element={<OKRPage />} />
-                    <Route path="/okr-tools/project-plan" element={<ProjectPlanPage />} />
-                    <Route path="/memory" element={<MemoryPage />} />
-                    <Route path="/project-plan-okr" element={<ProjectPlanOKRPage />} />
+                    <Route path="/okr-tools/roadmap" element={<RoadmapPage />} />
+                    <Route path="/okr-tools/memory" element={<MemoryPage />} />
                   </Routes>
                 </main>
               </div>

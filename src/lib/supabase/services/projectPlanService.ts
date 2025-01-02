@@ -21,6 +21,7 @@ export async function getAll() {
         objective
       )
     `)
+    .is('okr_ref', null)  
     .order('created_at', { ascending: false });
 
   return { data, error };
@@ -62,6 +63,16 @@ export async function remove(id: string) {
     .from('project_plan')
     .delete()
     .eq('id', id);
+
+  return { error };
+}
+
+export async function removeAllOKRPlans() {
+  // Supprimer tous les plans liés à des OKR
+  const { error } = await supabase
+    .from('project_plan')
+    .delete()
+    .not('okr_ref', 'is', null);
 
   return { error };
 }
