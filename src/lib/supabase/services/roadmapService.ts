@@ -11,13 +11,26 @@ export interface RoadmapItem {
   created_at?: string;
   start_date?: string;
   end_date?: string;
+  okr_id?: string;  // Nouveau champ pour la liaison avec OKR
 }
 
-export async function getAll() {
-  const { data, error } = await supabase
+export async function getAll(okrId?: string) {
+  const query = supabase
     .from('roadmap')
-    .select('*')
+    .select(`
+      *,
+      okr:okr_id (
+        id,
+        objective
+      )
+    `)
     .order('created_at', { ascending: false });
+
+  if (okrId) {
+    query.eq('okr_id', okrId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching roadmap items:', error);
