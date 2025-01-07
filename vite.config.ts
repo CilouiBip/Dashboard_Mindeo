@@ -8,6 +8,10 @@ dotenv.config();
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 2000,
+    strictPort: true
+  },
   optimizeDeps: {
     include: [
       'recharts',
@@ -54,10 +58,6 @@ export default defineConfig({
       'recharts': 'recharts/es6'
     },
     dedupe: ['react', 'react-dom', 'recharts']
-  },
-  server: {
-    port: 3000,
-    strictPort: true
   },
   test: {
     globals: true,

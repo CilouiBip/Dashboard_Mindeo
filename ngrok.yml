@@ -3,7 +3,8 @@ authtoken: 2qDnrpTVB9GwCB2cOaN9vbtaM2a_6g3aoNTcmnZzBxcXF4PTy
 tunnels:
   mindeo-dashboard:
     proto: http
-    addr: 3000
+    addr: 2000
+    hostname: mindeo-dashboard.ngrok.io
   new-app:
     proto: http
     addr: 4000
