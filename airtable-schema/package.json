@@ -1,0 +1,1 @@
+{"name": "airtable-schema", "version": "1.0.0", "type": "module", "main": "getAirtableSchema.js", "dependencies": {"airtable": "^0.12.2", "node-fetch": "^3.3.2"}}

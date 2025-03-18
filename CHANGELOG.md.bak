@@ -1,0 +1,45 @@
+# Changelog - Dashboard Mindeo
+
+## [Non publié] - 2025-03-17
+
+### Ajouts
+- OVERVIEW.md : Vue d'ensemble du projet et de son architecture actuelle
+- ROADMAP.md : Plan de développement technique avec phases et priorités
+- CHANGELOG.md : Journal des modifications et des évolutions
+
+### Analyse technique
+- Identification de la structure des données Airtable et des relations
+- Cartographie des flux d'intégration API
+- Évaluation des performances et identification des points d'amélioration
+- Analyse des dépendances et de la dette technique
+
+### Planification
+- Définition de 4 phases pour la migration et l'amélioration
+- Priorisation des micro-blocs de développement
+- Établissement d'un plan de migration Airtable vers Supabase
+- Identification des risques et des stratégies de mitigation
+
+## Phases planifiées
+
+### Phase 1 - Stabilisation & Préparation (1-2 mois)
+- Audit technique complet des tables Airtable
+- Refactoring de la couche API pour abstraction complète
+- Tests unitaires et d'intégration des composants critiques
+- Correction des bugs identifiés et optimisations de performance
+
+### Phase 2 - Migration initiale vers Supabase (1-2 mois)
+- Conception du schéma de données Supabase
+- Migration des données statiques et de référence
+- Implémentation du système dual-write
+- Création d'adaptateurs de données pour normalisation
+
+### Phase 3 - Nouveaux modules (2-3 mois)
+- Développement du module Dealflow
+- Mise en place du module Due Diligence
+- Amélioration des Scorecards
+- Finalisation des OKR Tools
+
+### Phase 4 - Migration complète & Optimisations (1-2 mois)
+- Migration finale vers Supabase
+- Optimisations de performance avancées
+- Analytics et reporting améliorés

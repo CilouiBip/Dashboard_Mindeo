@@ -1,0 +1,1670 @@
+{
+  "baseId": "app6Q4KQzMBm5MEsz",
+  "tables": [
+    {
+      "name": "KPIs",
+      "fields": [
+        {
+          "name": "ID_KPI",
+          "type": "autoNumber"
+        },
+        {
+          "name": "Nom_KPI",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Fonctions_Readable",
+          "type": "formula"
+        },
+        {
+          "name": "Fonctions",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblet5Ajde662PBXG"
+        },
+        {
+          "name": "Fonctions_KPIs",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Type",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Valeur_Actuelle",
+          "type": "number"
+        },
+        {
+          "name": "Valeur_Precedente",
+          "type": "number"
+        },
+        {
+          "name": "Valeur_Min",
+          "type": "number"
+        },
+        {
+          "name": "Valeur_Max",
+          "type": "number"
+        },
+        {
+          "name": "Score_Final",
+          "type": "formula"
+        },
+        {
+          "name": "Statut",
+          "type": "formula"
+        },
+        {
+          "name": "Pondération",
+          "type": "number"
+        },
+        {
+          "name": "Score_Normalisé ",
+          "type": "formula"
+        },
+        {
+          "name": "Score_Normalisé_Sur_10",
+          "type": "formula"
+        },
+        {
+          "name": "Produit_Score_Pondération.",
+          "type": "formula"
+        },
+        {
+          "name": "Score_KPI_Final",
+          "type": "formula"
+        },
+        {
+          "name": "Description",
+          "type": "richText"
+        },
+        {
+          "name": "KPIs liés ",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "Période",
+          "type": "singleSelect"
+        },
+        {
+          "name": "To Audit",
+          "type": "formula"
+        },
+        {
+          "name": "Catégorie_Liée",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbljaBUOGj1YYzGW2"
+        },
+        {
+          "name": " Audit_Items_Récupérés",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Items_A_Auditer.",
+          "type": "formula"
+        },
+        {
+          "name": "Nom_Actions_Auditer",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Filtrer_Actions",
+          "type": "formula"
+        },
+        {
+          "name": "Filtrer_Actions copy",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Catégorie_Audit",
+          "type": "rollup"
+        },
+        {
+          "name": "Problem_Fonctions",
+          "type": "rollup"
+        },
+        {
+          "name": "Sub_Problem_Audit",
+          "type": "rollup"
+        },
+        {
+          "name": "Liaison vers une autre table",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbltSDngZx19Hj3kC"
+        },
+        {
+          "name": "Global Score Link",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Global Settings",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbleqcRWm25KUQIpO"
+        },
+        {
+          "name": "Global Pondération Link",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Pondération Max ",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbleqcRWm25KUQIpO"
+        },
+        {
+          "name": "Pondération Max (from Pondération Max )",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Pondération_Totale_Lookup",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonctions_Problems",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Sub_Problems",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Catégorie_Problem",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Catégorie_Problem 2",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbljaBUOGj1YYzGW2"
+        },
+        {
+          "name": "Audit_Items 2",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Audit_Items",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Table 10",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Audit_Items 3",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblLPDyFhJYTNZspm"
+        },
+        {
+          "name": "Imported table",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblA3A9N6Mu8P4afl"
+        },
+        {
+          "name": "KPIs_Benchmark",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblA3A9N6Mu8P4afl"
+        },
+        {
+          "name": "Audit_Items copy",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblrawgsdUBkHOE3W"
+        },
+        {
+          "name": "Actions_Priority",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblnSR53lyQyRA2JE"
+        },
+        {
+          "name": "KPIs_Benchmark copy",
+          "type": "singleLineText"
+        },
+        {
+          "name": "KPIs_Benchmark copy",
+          "type": "singleLineText"
+        },
+        {
+          "name": "KPIs_Benchmark copy",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbll8EOUVzYyhb8LI"
+        },
+        {
+          "name": "KPIs_Benchmark copy",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbll8EOUVzYyhb8LI"
+        }
+      ]
+    },
+    {
+      "name": "Fonctions_Problems",
+      "fields": [
+        {
+          "name": "Problem_ID",
+          "type": "autoNumber"
+        },
+        {
+          "name": "Problem_Name",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Function",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Description",
+          "type": "multilineText"
+        },
+        {
+          "name": "Priority",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Nom_KPI (from Main_KPIs)",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblwzvkSHEzrlkdM6"
+        },
+        {
+          "name": "KPIs_Liés (from Nom_KPI (from Main_KPIs))",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Sub_Problems",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Sub_Problems copy",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Sub_Problems copy",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Sub_Problems 2",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblwzvkSHEzrlkdM6"
+        },
+        {
+          "name": "Sub_Problems 2 copy",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Record",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblrawgsdUBkHOE3W"
+        }
+      ]
+    },
+    {
+      "name": "Sub_Problems",
+      "fields": [
+        {
+          "name": "SubProblem_ID",
+          "type": "formula"
+        },
+        {
+          "name": "SubProblem_Name",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Fonctions_Name_Problems",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbl97Q6zqWcSWSfvh"
+        },
+        {
+          "name": "Sub_Order",
+          "type": "number"
+        },
+        {
+          "name": "Problem_Name (from Fonctions_Name_Problems)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Description",
+          "type": "multilineText"
+        },
+        {
+          "name": "Priority",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Catégorie_Problem",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbljaBUOGj1YYzGW2"
+        },
+        {
+          "name": "KPIs_Liés",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonction_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonctions_Problems",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Fonctions_Problems 2",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbl97Q6zqWcSWSfvh"
+        }
+      ]
+    },
+    {
+      "name": "Catégorie_Problem",
+      "fields": [
+        {
+          "name": "Category_ID",
+          "type": "autoNumber"
+        },
+        {
+          "name": "Catégorie_Name",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Sub_Problems_Lin",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblwzvkSHEzrlkdM6"
+        },
+        {
+          "name": "Problem_Name_Fonctions",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs_Name",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "Fonctions_Name_Problems (from Fonctions_Problems_Lin)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs_Lookup_Audit",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Description",
+          "type": "multilineText"
+        },
+        {
+          "name": "Priority",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Audit_Items 3",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblLPDyFhJYTNZspm"
+        },
+        {
+          "name": "Name_Items_Audit",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonction_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "ID_KPI_Audit_Baseline",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Nom_KPI (from KPIs_Name)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs_Status",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "ID_Sub",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs 2",
+          "type": "singleLineText"
+        },
+        {
+          "name": "KPIs 3",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "Audit_Items copy",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblrawgsdUBkHOE3W"
+        }
+      ]
+    },
+    {
+      "name": "Audit_Items",
+      "fields": [
+        {
+          "name": "Item_ID",
+          "type": "autoNumber"
+        },
+        {
+          "name": "Item_Name",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Action_Required",
+          "type": "multilineText"
+        },
+        {
+          "name": "Catégorie_Link copy",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbljaBUOGj1YYzGW2"
+        },
+        {
+          "name": "KPIs_Liés_Baseline",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "ID_KPI_Baseline",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Nom_KPI_Baseline",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs_Audit",
+          "type": "formula"
+        },
+        {
+          "name": "KPIs_Liés copy",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Sub_ID_Order",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Guidance",
+          "type": "multilineText"
+        },
+        {
+          "name": "Categorie_Problems_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Sub_Problems_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Sub_Problems_Text",
+          "type": "formula"
+        },
+        {
+          "name": "Sub_Problems_ID",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Problems_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonction_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Criticality",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Score",
+          "type": "number"
+        },
+        {
+          "name": "ScoreValue",
+          "type": "number"
+        },
+        {
+          "name": "Comments",
+          "type": "multilineText"
+        },
+        {
+          "name": "Playbook_Link",
+          "type": "url"
+        },
+        {
+          "name": " Audit Record ID",
+          "type": "formula"
+        },
+        {
+          "name": "KPIs_Status_",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Problem_Fonct_ID",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Catégorie_Problem",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Catégorie_Problem 2",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Actions_Priority",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblnSR53lyQyRA2JE"
+        }
+      ]
+    },
+    {
+      "name": "Score_Fonction",
+      "fields": [
+        {
+          "name": "Name",
+          "type": "singleLineText"
+        },
+        {
+          "name": "KPIs",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "Nom_KPI Rollup (from KPIs)",
+          "type": "rollup"
+        },
+        {
+          "name": "Score_Normalisé  Rollup (from KPIs)",
+          "type": "rollup"
+        },
+        {
+          "name": "Nbr_KPIs",
+          "type": "count"
+        },
+        {
+          "name": "Pondération totale ",
+          "type": "rollup"
+        },
+        {
+          "name": "Nbr_KPIs_Alert",
+          "type": "rollup"
+        },
+        {
+          "name": "Score pondéré & normalisé ",
+          "type": "rollup"
+        },
+        {
+          "name": "Score_Final_Fonction",
+          "type": "formula"
+        }
+      ]
+    },
+    {
+      "name": "GLOBAL_SCORE",
+      "fields": [
+        {
+          "name": "Score Global",
+          "type": "singleLineText"
+        },
+        {
+          "name": "KPIs liés",
+          "type": "singleLineText"
+        },
+        {
+          "name": "KPIs",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "Pondération_Totale_Globale",
+          "type": "rollup"
+        },
+        {
+          "name": "Somme_Scores_Pondérés_Globale",
+          "type": "rollup"
+        },
+        {
+          "name": "Score_Global_Pondéré",
+          "type": "formula"
+        },
+        {
+          "name": "Score_Global_Sur_10",
+          "type": "formula"
+        },
+        {
+          "name": "Somme_Scores_Pondérés_Sur_10",
+          "type": "rollup"
+        }
+      ]
+    },
+    {
+      "name": "Global Settings.",
+      "fields": [
+        {
+          "name": "Name",
+          "type": "singleLineText"
+        },
+        {
+          "name": "KPIs",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "Global Settings Rollup (from KPIs)",
+          "type": "rollup"
+        },
+        {
+          "name": "Pondération Max",
+          "type": "rollup"
+        },
+        {
+          "name": "KPIs 2",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "Produit_Score_Pondération",
+          "type": "rollup"
+        },
+        {
+          "name": "Pondération_Totale ",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "KPIs_Benchmark",
+      "fields": [
+        {
+          "name": "KPI_ID",
+          "type": "autoNumber"
+        },
+        {
+          "name": "Link_KPIs",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "ID_KPI (from Link_KPIs)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Nom_KPI",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Nom_KPI_Sort",
+          "type": "formula"
+        },
+        {
+          "name": "Fonctions_Readable (from Link_KPIs)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonctions (from Link_KPIs)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonctions_KPIs (from Link_KPIs)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonctions_Sort",
+          "type": "formula"
+        },
+        {
+          "name": "Current_Values",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Previous_Value",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Impact_Weight",
+          "type": "number"
+        },
+        {
+          "name": "Category_Weight",
+          "type": "number"
+        },
+        {
+          "name": "Min_Benchmark",
+          "type": "number"
+        },
+        {
+          "name": "Max_Benchmark",
+          "type": "number"
+        },
+        {
+          "name": "Dependencies",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Dependencies_KPIs",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "Impact_Type",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Baseline_Revenue",
+          "type": "currency"
+        },
+        {
+          "name": "Baseline_EBITDA",
+          "type": "currency"
+        },
+        {
+          "name": "Scaling_Factor",
+          "type": "number"
+        },
+        {
+          "name": "EBITDA_Factor",
+          "type": "number"
+        },
+        {
+          "name": "Impact_Delta ",
+          "type": "formula"
+        },
+        {
+          "name": "Revenue_Impact",
+          "type": "formula"
+        },
+        {
+          "name": "EBITDA_Impact",
+          "type": "formula"
+        },
+        {
+          "name": "Total_Revenue_Potential",
+          "type": "formula"
+        },
+        {
+          "name": "Total_EBITDA_Potential",
+          "type": "formula"
+        },
+        {
+          "name": "Revenue_Growth_Percent",
+          "type": "formula"
+        },
+        {
+          "name": "EBITDA_Growth_Percent",
+          "type": "formula"
+        },
+        {
+          "name": "Impact_Direction",
+          "type": "singleSelect"
+        },
+        {
+          "name": "KPI_Type",
+          "type": "singleSelect"
+        }
+      ]
+    },
+    {
+      "name": "Liste_Complète",
+      "fields": [
+        {
+          "name": "Item_ID",
+          "type": "autoNumber"
+        },
+        {
+          "name": "Item_Name",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Action_Required",
+          "type": "multilineText"
+        },
+        {
+          "name": "Catégorie_Link copy",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbljaBUOGj1YYzGW2"
+        },
+        {
+          "name": "KPIs_Liés_Baseline",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "ID_KPI_Baseline",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Nom_KPI_Baseline",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs_Liés copy",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Guidance",
+          "type": "multilineText"
+        },
+        {
+          "name": "Categorie_Problems_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Sub_Problems_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Sub_Problems_Text",
+          "type": "formula"
+        },
+        {
+          "name": "Problems_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonction_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Criticality",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Sub_ID_Order",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Score",
+          "type": "number"
+        },
+        {
+          "name": "ScoreValue",
+          "type": "number"
+        },
+        {
+          "name": "Comments",
+          "type": "multilineText"
+        },
+        {
+          "name": "Playbook_Link",
+          "type": "url"
+        },
+        {
+          "name": " Audit Record ID",
+          "type": "formula"
+        },
+        {
+          "name": "KPIs_Status_",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Action_Audit 2",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Catégorie_Problem",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Catégorie_Problem 2",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Field 27",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Problems name",
+          "type": "manualSort"
+        },
+        {
+          "name": "Fonctions_Problems",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbl97Q6zqWcSWSfvh"
+        }
+      ]
+    },
+    {
+      "name": "Actions_Priority",
+      "fields": [
+        {
+          "name": "Action_Number",
+          "type": "autoNumber"
+        },
+        {
+          "name": "Action_ID",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblLPDyFhJYTNZspm"
+        },
+        {
+          "name": "Score (from Action_ID) 2",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Playbook_Link (from Action_ID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "To_Audit",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Item_ID",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Action_Required",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Item_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Catégorie_Link copy (from Action_ID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Catégorie_Name_Link",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs_Liés_Baseline (from Action_ID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "ID_KPI_Baseline (from Action_ID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Sub_Problems_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Sub_Problems_Text (from Action_ID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Problems_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonction_Name",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Criticality",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Status_Actions",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Status_Actions_App",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Status_Actions_Beta",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Score (from Action_ID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPIs_Status_ (from Action_ID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Time_Frame",
+          "type": "formula"
+        },
+        {
+          "name": "KPIs_IDs",
+          "type": "formula"
+        },
+        {
+          "name": "KPIs_Link",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "KPIs_Scores",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Priority_Score",
+          "type": "formula"
+        },
+        {
+          "name": "Average_KPI_Score",
+          "type": "formula"
+        },
+        {
+          "name": "Combined_Score",
+          "type": "formula"
+        },
+        {
+          "name": "Action_Week",
+          "type": "formula"
+        },
+        {
+          "name": "Start_Date",
+          "type": "dateTime"
+        },
+        {
+          "name": "Completion_Date",
+          "type": "dateTime"
+        },
+        {
+          "name": "Estimated_Hours",
+          "type": "number"
+        },
+        {
+          "name": "Actual_Hours",
+          "type": "number"
+        },
+        {
+          "name": "Progress",
+          "type": "number"
+        },
+        {
+          "name": "Assignee",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Priority_Level",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Duration_Day",
+          "type": "formula"
+        },
+        {
+          "name": "Efficiency_Rate",
+          "type": "formula"
+        },
+        {
+          "name": "Moyenne des heures",
+          "type": "formula"
+        },
+        {
+          "name": "Taux de complétion",
+          "type": "formula"
+        }
+      ]
+    },
+    {
+      "name": "KPIs_Definitions",
+      "fields": [
+        {
+          "name": "KPI_ID",
+          "type": "autoNumber"
+        },
+        {
+          "name": "Link_KPIs",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "ID_KPI (from Link_KPIs)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Nom_KPI",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Nom_KPI_Sort",
+          "type": "formula"
+        },
+        {
+          "name": "Fonctions_Readable (from Link_KPIs)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonctions (from Link_KPIs)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonctions_KPIs (from Link_KPIs)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Fonctions_Sort",
+          "type": "formula"
+        },
+        {
+          "name": "Current_Values",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Previous_Value",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Impact_Weight",
+          "type": "number"
+        },
+        {
+          "name": "Category_Weight",
+          "type": "number"
+        },
+        {
+          "name": "Min_Benchmark",
+          "type": "number"
+        },
+        {
+          "name": "Max_Benchmark",
+          "type": "number"
+        },
+        {
+          "name": "Dependencies",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Dependencies_KPIs",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblHoCPx9TJH877Mv"
+        },
+        {
+          "name": "Impact_Type",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Baseline_Revenue",
+          "type": "currency"
+        },
+        {
+          "name": "Baseline_EBITDA",
+          "type": "currency"
+        },
+        {
+          "name": "Scaling_Factor",
+          "type": "number"
+        },
+        {
+          "name": "EBITDA_Factor",
+          "type": "number"
+        },
+        {
+          "name": "Impact_Delta ",
+          "type": "formula"
+        },
+        {
+          "name": "Revenue_Impact",
+          "type": "formula"
+        },
+        {
+          "name": "EBITDA_Impact",
+          "type": "formula"
+        },
+        {
+          "name": "Total_Revenue_Potential",
+          "type": "formula"
+        },
+        {
+          "name": "Total_EBITDA_Potential",
+          "type": "formula"
+        },
+        {
+          "name": "Revenue_Growth_Percent",
+          "type": "formula"
+        },
+        {
+          "name": "EBITDA_Growth_Percent",
+          "type": "formula"
+        },
+        {
+          "name": "Impact_Direction",
+          "type": "singleSelect"
+        },
+        {
+          "name": "KPI_Type",
+          "type": "singleSelect"
+        }
+      ]
+    },
+    {
+      "name": "Qualification_Infopreneurs",
+      "fields": [
+        {
+          "name": "Nom_Complet",
+          "type": "singleLineText"
+        },
+        {
+          "name": "ID_Infopreneur",
+          "type": "autoNumber"
+        },
+        {
+          "name": "CreatedDate",
+          "type": "dateTime"
+        },
+        {
+          "name": "Téléphone",
+          "type": "phoneNumber"
+        },
+        {
+          "name": "Nom_Business",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Lien_Principal",
+          "type": "url"
+        },
+        {
+          "name": "Instagram",
+          "type": "url"
+        },
+        {
+          "name": "YouTube",
+          "type": "url"
+        },
+        {
+          "name": "LinkedIn",
+          "type": "url"
+        },
+        {
+          "name": "Facebook",
+          "type": "url"
+        },
+        {
+          "name": "TikTok",
+          "type": "url"
+        },
+        {
+          "name": "Autre_Réseau",
+          "type": "url"
+        },
+        {
+          "name": "Sous_Niche",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Expérience_Années",
+          "type": "number"
+        },
+        {
+          "name": "CA_Mensuel",
+          "type": "number"
+        },
+        {
+          "name": "CA_Source_Principale",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Marge_Bénéficiaire",
+          "type": "percent"
+        },
+        {
+          "name": "Taille_Liste_Email",
+          "type": "number"
+        },
+        {
+          "name": "Taille_Audience_Sociale",
+          "type": "number"
+        },
+        {
+          "name": "Canal_Acquisition_Principal",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Budget_Ads_Mensuel",
+          "type": "number"
+        },
+        {
+          "name": "Prix_Moyen_Offre",
+          "type": "number"
+        },
+        {
+          "name": "Taux_Conversion_Global",
+          "type": "percent"
+        },
+        {
+          "name": "Type_Funnel_Principal",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Type_Contenu_Principal",
+          "type": "singleSelect"
+        },
+        {
+          "name": "CTA_Principale",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Processus_Closing",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Outil_CRM",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Objectif_CA_6Mois",
+          "type": "number"
+        },
+        {
+          "name": "Priorité_1",
+          "type": "multilineText"
+        },
+        {
+          "name": "Priorité_2",
+          "type": "multilineText"
+        },
+        {
+          "name": "Défi_Principal",
+          "type": "multilineText"
+        },
+        {
+          "name": "Blocage_Croissance",
+          "type": "multipleSelects"
+        },
+        {
+          "name": "Objectif_Collaboration",
+          "type": "multilineText"
+        },
+        {
+          "name": "Statut",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Date_Soumission",
+          "type": "dateTime"
+        },
+        {
+          "name": "Dernière_Modification",
+          "type": "dateTime"
+        },
+        {
+          "name": "Score_Qualification",
+          "type": "formula"
+        },
+        {
+          "name": "DD_Items",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblTbZ5y7tuIx1S5d"
+        },
+        {
+          "name": "MVD_Answers",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbljoWrZS9kZelzs1"
+        },
+        {
+          "name": "DD Items Link ",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tblTbZ5y7tuIx1S5d"
+        },
+        {
+          "name": "InfopreneurID (from DD Items Link )",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "DD_NbInProgress",
+          "type": "rollup"
+        },
+        {
+          "name": "StatutAuto",
+          "type": "formula"
+        }
+      ]
+    },
+    {
+      "name": "OKRs",
+      "fields": [
+        {
+          "name": "OKR_ID",
+          "type": "autoNumber"
+        },
+        {
+          "name": "Objective",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Key_Results",
+          "type": "multilineText"
+        },
+        {
+          "name": "Owner",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Iteration",
+          "type": "number"
+        },
+        {
+          "name": "VisionRef",
+          "type": "multilineText"
+        },
+        {
+          "name": "Comments",
+          "type": "multilineText"
+        }
+      ]
+    },
+    {
+      "name": "ProjectPlan_OKRs",
+      "fields": [
+        {
+          "name": "Name",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Description",
+          "type": "multilineText"
+        },
+        {
+          "name": "Owner",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Owner copy",
+          "type": "singleCollaborator"
+        },
+        {
+          "name": "Due Date",
+          "type": "dateTime"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Priority",
+          "type": "singleSelect"
+        },
+        {
+          "name": "OKR_Ref",
+          "type": "multilineText"
+        },
+        {
+          "name": "Comments",
+          "type": "multilineText"
+        }
+      ]
+    },
+    {
+      "name": "DD_Items",
+      "fields": [
+        {
+          "name": "ID_Item",
+          "type": "singleLineText"
+        },
+        {
+          "name": "InfopreneurID",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbl7t2wc7ZFuZdijP"
+        },
+        {
+          "name": "Nom_Complet (from InfopreneurID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "ID_Infopreneur (from InfopreneurID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "Category",
+          "type": "singleSelect"
+        },
+        {
+          "name": "SubCategory",
+          "type": "singleSelect"
+        },
+        {
+          "name": "ItemName",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Description",
+          "type": "multilineText"
+        },
+        {
+          "name": "DueDate",
+          "type": "date"
+        },
+        {
+          "name": "Owner",
+          "type": "singleLineText"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "DeliverableType",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Attachment",
+          "type": "multipleAttachments"
+        },
+        {
+          "name": "Observations",
+          "type": "multilineText"
+        },
+        {
+          "name": "Priority",
+          "type": "singleSelect"
+        },
+        {
+          "name": "CreatedDate",
+          "type": "dateTime"
+        },
+        {
+          "name": "IsInProgress",
+          "type": "formula"
+        },
+        {
+          "name": "Qualification_Infopreneurs",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbl7t2wc7ZFuZdijP"
+        }
+      ]
+    },
+    {
+      "name": "DD_Phases",
+      "fields": [
+        {
+          "name": "ID_Phase",
+          "type": "singleLineText"
+        },
+        {
+          "name": "InfopreneurID",
+          "type": "singleLineText"
+        },
+        {
+          "name": "PhaseName",
+          "type": "singleSelect"
+        },
+        {
+          "name": "StartDate",
+          "type": "date"
+        },
+        {
+          "name": "EndDate",
+          "type": "date"
+        },
+        {
+          "name": "Status",
+          "type": "singleSelect"
+        },
+        {
+          "name": "Notes",
+          "type": "multilineText"
+        }
+      ]
+    },
+    {
+      "name": "MVD_Answers",
+      "fields": [
+        {
+          "name": "ID_Answer",
+          "type": "singleLineText"
+        },
+        {
+          "name": "InfopreneurID",
+          "type": "multipleRecordLinks",
+          "linkedTableId": "tbl7t2wc7ZFuZdijP"
+        },
+        {
+          "name": "Nom_Complet (from InfopreneurID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "ID_Infopreneur (from InfopreneurID)",
+          "type": "multipleLookupValues"
+        },
+        {
+          "name": "KPI_Name",
+          "type": "singleSelect"
+        },
+        {
+          "name": "CurrentValue",
+          "type": "number"
+        },
+        {
+          "name": "ProofUpload",
+          "type": "multipleAttachments"
+        },
+        {
+          "name": "CreatedDate",
+          "type": "dateTime"
+        }
+      ]
+    }
+  ]
+}

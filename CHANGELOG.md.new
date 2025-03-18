@@ -1,0 +1,28 @@
+# Changelog Dashboard Mindeo
+
+## [1.3.0] - 2025-03-18
+
+### Ajouté
+- Nouveaux benchmarks pour tous les KPIs basés sur le marché francophone de l'infopreneuriat
+- Logique spécifique pour l'EBITDA (status inversé: >40% rouge, 40-60% orange, >60% vert)
+
+### Modifié
+- Mise à jour des seuils min/max pour tous les KPIs dans la table `kpi_def`
+- Amélioration du calcul des scores avec gestion spécifique pour les KPIs inversés
+- Optimisation des vues SQL pour garantir la cohérence des données
+
+### Corrigé
+- Gestion améliorée des KPIs avec logique inversée (plus petit = meilleur)
+
+## [1.2.0] - 2025-02-15
+
+### Ajouté
+- Tableau de bord pour visualiser les KPIs par fonction
+- Interface de mise à jour des valeurs de KPI
+
+### Modifié
+- Migration complète d'Airtable vers Supabase
+- Amélioration des performances de chargement des données
+
+### Corrigé
+- Affichage cohérent des scores entre le dashboard et les pages détaillées
