@@ -1,8 +1,8 @@
-import axios from 'axios';
-import { KPI, validateKPI, validateKPIs } from '../schemas/airtable';
-import { baseUrl, headers, sanitizeNumber } from './utils/apiUtils';
+import { KPI, KPIType } from '../types/airtable';
+import { supabaseKpiService } from '../services/supabaseKpi';
 
-// Mock data for development and testing
+// Mock data for development and testing only
+// Will be used only if mock mode is explicitly enabled
 const mockKPIs = [
   {
     ID_KPI: 'kpi1',
@@ -33,105 +33,75 @@ const mockKPIs = [
 ];
 
 /**
- * Fetches KPIs from the API or mock data
+ * Flag to control mock mode (default: disabled)
+ * Set to true ONLY for testing with mock data
+ */
+const USE_MOCK_DATA = false; // Désactivé pour utiliser les vraies données Supabase
+
+/**
+ * Helper function to convert mock data to KPI format
+ */
+function convertMockToKPI(mockKpi: typeof mockKPIs[0]): KPI {
+  return {
+    ID_KPI: mockKpi.ID_KPI,
+    Nom_KPI: mockKpi.Nom_KPI,
+    Type: mockKpi.Type as KPIType,
+    Valeur_Actuelle: Number(mockKpi.Valeur_Actuelle) || 0,
+    Valeur_Precedente: 0,
+    Score_KPI_Final: 0,
+    Statut: '',
+    Fonctions: Array.isArray(mockKpi.Fonctions) ? mockKpi.Fonctions[0] : String(mockKpi.Fonctions || '')
+  };
+}
+
+/**
+ * Fetches KPIs from Supabase or mock data
  */
 export async function fetchKPIs(): Promise<KPI[]> {
   try {
-    // In development, use mock data
-    if (process.env.NODE_ENV === 'development') {
-      const result = validateKPIs(mockKPIs);
-      if (!result.success) {
-        console.error('Mock KPI validation failed:', result.errors);
-        return [];
-      }
-      return result.data;
+    // Use mock data if explicitly enabled and in development
+    if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
+      console.log('[DIAGNOSTIC] Using mock KPI data');
+      const mockData = mockKPIs.map(convertMockToKPI);
+      console.log('[DIAGNOSTIC] Mock KPI count:', mockData.length);
+      console.log('[DIAGNOSTIC] First mock KPI:', mockData[0]);
+      return mockData;
     }
 
-    // In production, fetch from Airtable
-    const response = await axios.get(`${baseUrl}/KPIs`, { 
-      headers,
-      params: {
-        view: 'Grid view'
-      }
-    });
-
-    if (!response.data.records) {
-      console.error('No KPI data found');
-      return [];
+    // Fetch from Supabase
+    console.log('[DIAGNOSTIC] Fetching KPIs from Supabase...');
+    const kpis = await supabaseKpiService.getKPIs();
+    console.log('[DIAGNOSTIC] Raw KPIs from Supabase:', kpis);
+    console.log('[DIAGNOSTIC] KPI count:', kpis.length);
+    if (kpis.length > 0) {
+      console.log('[DIAGNOSTIC] First KPI structure:', kpis[0]);
+    } else {
+      console.log('[DIAGNOSTIC] No KPIs found in Supabase');
     }
-
-    const rawData = response.data.records.map((record: any) => ({
-      ID_KPI: record.id,
-      Nom_KPI: record.fields.Nom_KPI || '',
-      Type: record.fields.Type || '',
-      Valeur_Actuelle: sanitizeNumber(record.fields.Valeur_Actuelle),
-      Valeur_Precedente: sanitizeNumber(record.fields.Valeur_Precedente),
-      Score_KPI_Final: sanitizeNumber(record.fields.Score_KPI_Final),
-      Statut: record.fields.Statut || '',
-      Fonctions: record.fields.Fonctions || ''
-    }));
-
-    const result = validateKPIs(rawData);
-    
-    if (!result.success) {
-      console.error('KPI validation failed:', result.errors);
-      return [];
-    }
-    
-    return result.data;
+    return kpis;
   } catch (error) {
-    console.error('Error fetching KPIs:', error);
+    console.error('[DIAGNOSTIC] Error fetching KPIs:', error);
     return [];
   }
 }
 
 /**
- * Fetches KPIs benchmark from the API or mock data
+ * Fetches KPIs benchmark from Supabase or mock data
  */
 export async function fetchKPIsBenchmark(): Promise<KPI[]> {
   try {
-    // In development, use mock data
-    if (process.env.NODE_ENV === 'development') {
-      const result = validateKPIs(mockKPIs);
-      if (!result.success) {
-        console.error('Mock KPI benchmark validation failed:', result.errors);
-        return [];
-      }
-      return result.data;
+    // Use mock data if explicitly enabled and in development
+    if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
+      console.log('Using mock benchmark data');
+      return mockKPIs.map(convertMockToKPI);
     }
 
-    // In production, fetch from Airtable
-    const response = await axios.get(`${baseUrl}/KPIs_Benchmark`, { 
-      headers,
-      params: {
-        view: 'Grid view'
-      }
-    });
-
-    if (!response.data.records) {
-      console.error('No KPI benchmark data found');
-      return [];
-    }
-
-    const rawData = response.data.records.map((record: any) => ({
-      ID_KPI: record.id,
-      Nom_KPI: record.fields.Nom_KPI || '',
-      Type: record.fields.Type || '',
-      Valeur_Actuelle: sanitizeNumber(record.fields.Valeur_Actuelle),
-      Valeur_Precedente: sanitizeNumber(record.fields.Valeur_Precedente),
-      Score_KPI_Final: sanitizeNumber(record.fields.Score_KPI_Final),
-      Statut: record.fields.Statut || '',
-      Fonctions: record.fields.Fonctions || ''
-    }));
-
-    const result = validateKPIs(rawData);
-    
-    if (!result.success) {
-      console.error('KPI benchmark validation failed:', result.errors);
-      return [];
-    }
-    
-    return result.data;
+    // Fetch benchmarks from Supabase
+    // Note: This assumes benchmark KPIs are stored in the same table with a 'benchmark' flag
+    // Adjust the implementation based on your actual data structure
+    const benchmarkKpis = await supabaseKpiService.getKPIs();
+    console.log('Benchmark KPIs fetched from Supabase:', benchmarkKpis);
+    return benchmarkKpis;
   } catch (error) {
     console.error('Error fetching KPI benchmarks:', error);
     return [];
@@ -139,52 +109,30 @@ export async function fetchKPIsBenchmark(): Promise<KPI[]> {
 }
 
 /**
- * Fetches a KPI by ID from the API or mock data
+ * Fetches a KPI by ID from Supabase or mock data
  */
 export async function getKPIById(kpiId: string): Promise<KPI | null> {
   try {
-    // In development, use mock data
-    if (process.env.NODE_ENV === 'development') {
+    // Use mock data if explicitly enabled and in development
+    if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
       const mockKPI = mockKPIs.find(kpi => kpi.ID_KPI === kpiId);
       if (!mockKPI) {
         console.error('Mock KPI not found');
         return null;
       }
-
-      const result = validateKPI(mockKPI);
-      if (!result.success) {
-        console.error('Mock KPI validation failed:', result.errors);
-        return null;
-      }
-      return result.data;
+      return convertMockToKPI(mockKPI);
     }
 
-    // In production, fetch from Airtable
-    const response = await axios.get(`${baseUrl}/KPIs/${kpiId}`, { headers });
-    if (!response.data) {
+    // Fetch from Supabase
+    const kpis = await supabaseKpiService.getKPIs();
+    const kpi = kpis.find(k => k.ID_KPI === kpiId);
+    
+    if (!kpi) {
       console.error('KPI not found');
       return null;
     }
-
-    const rawData = {
-      ID_KPI: response.data.id,
-      Nom_KPI: response.data.fields.Nom_KPI || '',
-      Type: response.data.fields.Type || '',
-      Valeur_Actuelle: sanitizeNumber(response.data.fields.Valeur_Actuelle),
-      Valeur_Precedente: sanitizeNumber(response.data.fields.Valeur_Precedente),
-      Score_KPI_Final: sanitizeNumber(response.data.fields.Score_KPI_Final),
-      Statut: response.data.fields.Statut || '',
-      Fonctions: response.data.fields.Fonctions || ''
-    };
-
-    const result = validateKPI(rawData);
     
-    if (!result.success) {
-      console.error('KPI validation failed:', result.errors);
-      return null;
-    }
-    
-    return result.data;
+    return kpi;
   } catch (error) {
     console.error('Error fetching KPI:', error);
     return null;
@@ -195,118 +143,119 @@ export async function getKPIById(kpiId: string): Promise<KPI | null> {
  * Updates a KPI value
  */
 export async function updateKPIValue(data: { ID_KPI: string; Valeur_Actuelle: number }): Promise<KPI | null> {
+  console.log('🔍 DÉBUT updateKPIValue - Données reçues:', data);
   try {
-    // In development, return mock updated data
-    if (process.env.NODE_ENV === 'development') {
-      const mockUpdated = {
-        ...mockKPIs.find(kpi => kpi.ID_KPI === data.ID_KPI)!,
+    // Use mock data if explicitly enabled and in development
+    if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
+      console.log('⚠️ Utilisation des données MOCK - cette partie ne devrait pas être exécutée');
+      const mockIndex = mockKPIs.findIndex(kpi => kpi.ID_KPI === data.ID_KPI);
+      if (mockIndex === -1) {
+        console.error('Mock KPI not found');
+        return null;
+      }
+
+      // Update the mock data
+      mockKPIs[mockIndex] = {
+        ...mockKPIs[mockIndex],
         Valeur_Actuelle: data.Valeur_Actuelle.toString()
       };
       
-      const result = validateKPI(mockUpdated);
-      if (!result.success) {
-        console.error('Mock KPI update validation failed:', result.errors);
-        return null;
-      }
-      return result.data;
+      return convertMockToKPI(mockKPIs[mockIndex]);
     }
 
-    // In production, update via API
-    const response = await axios.patch(
-      `${baseUrl}/KPIs/${data.ID_KPI}`,
-      {
-        fields: {
-          Valeur_Actuelle: data.Valeur_Actuelle
-        }
-      },
-      { headers }
-    );
-
-    if (!response.data) {
-      console.error('KPI not found');
-      return null;
-    }
-
-    const rawData = {
-      ID_KPI: response.data.id,
-      Nom_KPI: response.data.fields.Nom_KPI || '',
-      Type: response.data.fields.Type || '',
-      Valeur_Actuelle: sanitizeNumber(response.data.fields.Valeur_Actuelle),
-      Valeur_Precedente: sanitizeNumber(response.data.fields.Valeur_Precedente),
-      Score_KPI_Final: sanitizeNumber(response.data.fields.Score_KPI_Final),
-      Statut: response.data.fields.Statut || '',
-      Fonctions: response.data.fields.Fonctions || ''
-    };
-
-    const result = validateKPI(rawData);
+    // Update via Supabase
+    const kpiId = parseInt(data.ID_KPI, 10);
+    console.log('🔢 KPI ID parsé:', kpiId);
     
-    if (!result.success) {
-      console.error('Updated KPI validation failed:', result.errors);
+    if (isNaN(kpiId)) {
+      console.error('❌ Invalid KPI ID format');
       return null;
     }
     
-    return result.data;
+    console.log('🔄 Appel de updateKPI avec:', kpiId, { Valeur_Actuelle: data.Valeur_Actuelle });
+    try {
+      await supabaseKpiService.updateKPI(kpiId, {
+        Valeur_Actuelle: data.Valeur_Actuelle
+      });
+      console.log('✅ Appel updateKPI réussi');
+    } catch (updateError) {
+      console.error('❌ Erreur lors de l\'appel updateKPI:', updateError);
+      throw updateError; // Propager l'erreur pour le catch externe
+    }
+    
+    // Get the updated KPI
+    console.log('🔍 Récupération du KPI mis à jour...');
+    let kpis;
+    try {
+      kpis = await supabaseKpiService.getKPIs();
+      console.log(`✅ ${kpis.length} KPIs récupérés`);
+    } catch (getError) {
+      console.error('❌ Erreur lors de la récupération des KPIs:', getError);
+      throw getError;
+    }
+    
+    console.log('🔍 Recherche du KPI mis à jour avec ID:', data.ID_KPI);
+    const updatedKpi = kpis.find(k => k.ID_KPI === data.ID_KPI);
+    
+    if (!updatedKpi) {
+      console.error('❌ KPI mis à jour non trouvé dans les résultats');
+      console.log('📋 Liste des IDs disponibles:', kpis.map(k => k.ID_KPI));
+      return null;
+    }
+    
+    console.log('✅ KPI mis à jour trouvé:', updatedKpi);
+    return updatedKpi;
   } catch (error) {
-    console.error('Error updating KPI:', error);
+    console.error('❌ Erreur lors de la mise à jour du KPI:', error);
     return null;
   }
 }
 
 /**
- * Updates a KPI value (Legacy)
+ * Legacy method to update a KPI value
+ * Keeps backward compatibility with older code
  */
 export async function updateKPIValueLegacy(id: string, value: number): Promise<KPI | null> {
   try {
-    // In development, return mock updated data
-    if (process.env.NODE_ENV === 'development') {
-      const mockUpdated = {
-        ...mockKPIs.find(kpi => kpi.ID_KPI === id)!,
-        Valeur_Precedente: value.toString()
-      };
-      
-      const result = validateKPI(mockUpdated);
-      if (!result.success) {
-        console.error('Mock KPI update validation failed:', result.errors);
+    // Use mock data if explicitly enabled and in development
+    if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
+      const mockIndex = mockKPIs.findIndex(kpi => kpi.ID_KPI === id);
+      if (mockIndex === -1) {
+        console.error('Mock KPI not found');
         return null;
       }
-      return result.data;
+
+      // Update the mock data
+      mockKPIs[mockIndex] = {
+        ...mockKPIs[mockIndex],
+        Valeur_Actuelle: value.toString()
+      };
+      
+      return convertMockToKPI(mockKPIs[mockIndex]);
     }
 
-    // In production, update via API
-    const response = await axios.patch(
-      `${baseUrl}/KPIs/${id}`,
-      {
-        fields: {
-          Valeur_Precedente: value
-        }
-      },
-      { headers }
-    );
-
-    if (!response.data) {
-      console.error('KPI not found');
-      return null;
-    }
-
-    const rawData = {
-      ID_KPI: response.data.id,
-      Nom_KPI: response.data.fields.Nom_KPI || '',
-      Type: response.data.fields.Type || '',
-      Valeur_Actuelle: sanitizeNumber(response.data.fields.Valeur_Actuelle),
-      Valeur_Precedente: sanitizeNumber(response.data.fields.Valeur_Precedente),
-      Score_KPI_Final: sanitizeNumber(response.data.fields.Score_KPI_Final),
-      Statut: response.data.fields.Statut || '',
-      Fonctions: response.data.fields.Fonctions || ''
-    };
-
-    const result = validateKPI(rawData);
+    // Update via Supabase
+    const kpiId = parseInt(id, 10);
     
-    if (!result.success) {
-      console.error('Updated KPI validation failed:', result.errors);
+    if (isNaN(kpiId)) {
+      console.error('Invalid KPI ID format');
       return null;
     }
     
-    return result.data;
+    await supabaseKpiService.updateKPI(kpiId, {
+      Valeur_Actuelle: value
+    });
+    
+    // Get the updated KPI
+    const kpis = await supabaseKpiService.getKPIs();
+    const updatedKpi = kpis.find(k => k.ID_KPI === id);
+    
+    if (!updatedKpi) {
+      console.error('Updated KPI not found');
+      return null;
+    }
+    
+    return updatedKpi;
   } catch (error) {
     console.error('Error updating legacy KPI:', error);
     return null;

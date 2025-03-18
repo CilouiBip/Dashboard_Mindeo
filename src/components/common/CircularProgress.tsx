@@ -5,6 +5,7 @@ interface CircularProgressProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   trackColor?: string;
+  children?: React.ReactNode; // Ajouter la propriété children pour permettre l'affichage du contenu interne
 }
 
 const CircularProgress: React.FC<CircularProgressProps> = ({

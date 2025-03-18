@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "postgres-supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:Casablanca2025%408%2F%2B@db.ixhmauuhimhxyoiwsjay.supabase.co:5432/postgres"
+      ],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "postgresql://postgres:Casablanca2025%408%2F%2B@db.ixhmauuhimhxyoiwsjay.supabase.co:5432/postgres"
+      }
+    }
+  }
+}

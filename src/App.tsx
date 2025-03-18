@@ -8,6 +8,7 @@ import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
 import Dashboard from './pages/Dashboard';
 import KPIsMVD from './pages/KPIsMVD';
+import KPIsDiagnostic from './pages/KPIsDiagnostic'; // Import du composant de diagnostic
 import AuditTabs from './components/audit/AuditTabs';
 import ActionsList from './pages/ActionsList';
 import ImpactSimulator from './pages/ImpactSimulator';
@@ -77,6 +78,7 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/kpis" element={<KPIsMVD />} />
+                    <Route path="/kpis-diagnostic" element={<KPIsDiagnostic />} />
                     <Route path="/audit" element={<AuditTabs auditItems={auditItems} onUpdate={refreshData} />} />
                     <Route path="/actions" element={<ActionsList />} />
                     <Route path="/project-plan" element={<ProjectPlanBeta />} />

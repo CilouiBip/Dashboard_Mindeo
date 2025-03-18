@@ -1,6 +1,8 @@
 export enum KPIType {
   Input = 'Input',
-  Output = 'Output'
+  Output = 'Output',
+  Principal = 'Principal',
+  Secondaire = 'Secondaire'
 }
 
 export enum Priority {

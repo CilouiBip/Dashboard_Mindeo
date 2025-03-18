@@ -1,26 +1,31 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/airtable';
-import { BarChart2, ArrowRight, Activity, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowRight, Activity } from 'lucide-react';
+// Import des nouveaux hooks Supabase
+import { useSupabaseGlobalScore } from '../hooks/useSupabaseGlobalScore';
+import { useSupabaseFunctionScores } from '../hooks/useSupabaseFunctionScores';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
-import Card from '../components/common/Card';
+// Card est importu00e9 mais non utilisu00e9
 import CircularProgress from '../components/common/CircularProgress';
 import { getScoreColor } from '../utils/calculations';
 import { formatNumber } from '../utils/format';
 import { FunctionIcon } from '../components/audit/FunctionIcon';
 
 const Dashboard = () => {
-  const { data: globalScore, isLoading: isGlobalScoreLoading, error: globalScoreError } = useQuery({
-    queryKey: ['globalScore'],
-    queryFn: api.fetchGlobalScore,
-  });
+  // Utiliser les nouveaux hooks Supabase pour récupérer les scores
+  const { 
+    data: globalScore, 
+    isLoading: isGlobalScoreLoading, 
+    error: globalScoreError 
+  } = useSupabaseGlobalScore();
 
-  const { data: functionScores, isLoading: isFunctionScoresLoading, error: functionScoresError } = useQuery({
-    queryKey: ['functionScores'],
-    queryFn: api.fetchFunctionScores,
-  });
+  const { 
+    data: functionScores, 
+    isLoading: isFunctionScoresLoading, 
+    error: functionScoresError 
+  } = useSupabaseFunctionScores();
 
   const { data: auditItems, isLoading: isAuditLoading, error: auditError } = useQuery({
     queryKey: ['auditItems'],

@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchKPIs } from '../api/kpiApi';
 import { useDebugMode } from './useDebugMode';
 import { calculateFunctionScores } from '../utils/calculations';
 import { KPI } from '../types/airtable';
+import { getKPIRepository } from '../repositories/KPIRepository';
 
 export interface KPIQueryOptions {
   enabled?: boolean;
@@ -20,9 +20,11 @@ export const useKPIData = (options: KPIQueryOptions = {}) => {
     refetchOnWindowFocus = true,
   } = options;
 
+  const kpiRepository = getKPIRepository();
+
   return useQuery<KPI[], Error>({
     queryKey: ['kpis'],
-    queryFn: fetchKPIs,
+    queryFn: () => kpiRepository.fetchKPIs(),
     select: (data) => {
       const scores = calculateFunctionScores(data);
       
