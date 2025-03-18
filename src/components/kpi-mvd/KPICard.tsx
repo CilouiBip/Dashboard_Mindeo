@@ -35,6 +35,8 @@ const KPICard: React.FC<KPICardProps> = ({ kpi, onUpdate, isUpdating }) => {
 
   const getProgressWidth = () => {
     const target = 10; // Maximum score
+    // Log pour débogage
+    console.log(`[KPICard] ${kpi.Nom_KPI} - Score brut: ${kpi.Score_KPI_Final}`);
     return `${(kpi.Score_KPI_Final / target) * 100}%`;
   };
 
@@ -81,7 +83,27 @@ const KPICard: React.FC<KPICardProps> = ({ kpi, onUpdate, isUpdating }) => {
         </div>
         <div className="text-right">
           <div className={`text-2xl font-medium ${getScoreColor(kpi.Score_KPI_Final)}`}>
-            {formatNumber(kpi.Score_KPI_Final)}
+            {(() => {
+              // Diagnostic: vérifier si une transformation est appliquée aux KPIs inversés
+              const kpiName = kpi.Nom_KPI;
+              const rawScore = kpi.Score_KPI_Final;
+              const kpiId = kpi.ID_KPI;
+              
+              // Log pour vérifier le score final sans transformation
+              console.log(`[CHECK] KPI ${kpiName} (ID: ${kpiId}) Score final = ${rawScore}`);
+              
+              // Détection des KPIs inversés par le nom (comme CAC ou CPL)
+              const isInversedKPI = ['cac', 'cpl', 'pipeline_velocity', 'taux_remboursement'].some(
+                inversedCode => kpiName.toLowerCase().includes(inversedCode)
+              );
+              
+              if (isInversedKPI) {
+                console.log(`[CHECK] KPI inversé ${kpiName} - Score affiché = ${rawScore} (doit être directement celui de la BDD)`);
+              }
+              
+              // Afficher la valeur originale de Score_KPI_Final sans aucune transformation
+              return formatNumber(rawScore);
+            })()}
           </div>
           {getValueTrend()}
         </div>
